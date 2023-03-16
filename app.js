@@ -29,22 +29,24 @@ yargs(hideBin(process.argv)).version(false)
 async function _deploySite(site, targetVersion) {
   const currentVersion = await _ssh(`cd ~/cloud/${site} && git describe --tags`);
   if (currentVersion === targetVersion) {
-    console.log(`> ✅  Version ${chalk.yellow(targetVersion)} is already deployed on site ${chalk.blue(site)}.`)
+    console.log(`👌 Version ${chalk.yellow(targetVersion)} is already deployed on site ${chalk.blue(site)}.`)
     return;
   }
 
-  console.log(`> Upgrading ${chalk.blue(site)} from ${chalk.yellow(currentVersion)} to ${chalk.yellow(targetVersion)}...`);
+  console.log('');
+  console.log(`⚙️ Upgrading ${chalk.blue(site)} from ${chalk.yellow(currentVersion)} to ${chalk.yellow(targetVersion)}...`);
 
-  console.log(`> Fetching latest changes from repository...`);
+  console.log(`☁️ Fetching latest changes from repository...`);
   await _ssh(`cd ~/cloud/${site} && git fetch`);
 
-  console.log(`> Changing to tag ${chalk.yellow(targetVersion)}...`);
+  console.log(`🏹 Changing to tag ${chalk.yellow(targetVersion)}...`);
   await _ssh(`cd ~/cloud/${site} && git checkout ${targetVersion}`);
 
-  console.log(`> Installing dependencies...`);
+  console.log(`📦 Installing dependencies...`);
   await _ssh(`cd ~/cloud/${site} && composer install`);
 
-  console.log(`> ✅  Version ${chalk.yellow(targetVersion)} has been deployed on ${chalk.blue(site)}\n`);
+  console.log(`✅  Version ${chalk.yellow(targetVersion)} has been deployed on ${chalk.blue(site)}`);
+  console.log('');
 }
 
 async function _deployAllSites(version) {
