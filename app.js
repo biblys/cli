@@ -3,6 +3,7 @@
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { execa } from 'execa';
+import chalk from 'chalk';
 
 yargs(hideBin(process.argv)).version(false)
   .command('deploy [site] [version]', 'deploy a single site', (yargs) => {
@@ -16,18 +17,34 @@ yargs(hideBin(process.argv)).version(false)
         type: 'string',
       })
   }, async ({ site, version }) => {
+    if (site === 'all') {
+      await _deployAllSites(version);
+      return;
+    }
+
     await _deploySite(site, version);
   })
   .parse()
 
-async function _deploySite(site, version) {
-  if (site === 'all') {
-    await _deployAllSites(version);
+async function _deploySite(site, targetVersion) {
+  const currentVersion = await _ssh(`cd ~/cloud/${site} && git describe --tags`);
+  if (currentVersion === targetVersion) {
+    console.log(`> ✅  Version ${chalk.yellow(targetVersion)} is already deployed on site ${chalk.blue(site)}.`)
     return;
   }
 
-  const { stdout } = await execa('./scripts/deploy', [site, version]);
-  console.log(stdout);
+  console.log(`> Upgrading ${chalk.blue(site)} from ${chalk.yellow(currentVersion)} to ${chalk.yellow(targetVersion)}...`);
+
+  console.log(`> Fetching latest changes from repository...`);
+  await _ssh(`cd ~/cloud/${site} && git fetch`);
+
+  console.log(`> Changing to tag ${chalk.yellow(targetVersion)}...`);
+  await _ssh(`cd ~/cloud/${site} && git checkout ${targetVersion}`);
+
+  console.log(`> Installing dependencies...`);
+  await _ssh(`cd ~/cloud/${site} && composer install`);
+
+  console.log(`> ✅  Version ${chalk.yellow(targetVersion)} has been deployed on ${chalk.blue(site)}\n`);
 }
 
 async function _deployAllSites(version) {
