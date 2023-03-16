@@ -6,6 +6,9 @@
   "author": "Clément Latzarus <c@ltzr.io>",
   "license": "MIT",
   "type": "module",
+  "bin": {
+    "biblys": "./app.js"
+  },
   "dependencies": {
     "execa": "^7.1.1",
     "yargs": "^17.7.1"
