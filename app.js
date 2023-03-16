@@ -16,8 +16,11 @@ yargs(hideBin(process.argv)).version(false)
         type: 'string',
       })
   }, async ({ site, version }) => {
-    const { stdout } = await execa('./scripts/deploy', [site, version]);
-    console.log(stdout);
+    await _deploySite(site, version);
   })
   .parse()
 
+async function _deploySite(site, version) {
+  const {stdout} = await execa('./scripts/deploy', [site, version]);
+  console.log(stdout);
+}
