@@ -31,9 +31,13 @@ async function _deploySite(site, version) {
 }
 
 async function _deployAllSites(version) {
-  const { stdout } = await execa('ssh', ['biblys', 'ls cloud']);
+  const { stdout } = await _ssh('ls cloud');
   const sites = stdout.split(/\r?\n/);
   for (const site of sites) {
     await _deploySite(site, version);
   }
+}
+
+async function _ssh(command) {
+  return await execa('ssh', ['biblys', command]);
 }
