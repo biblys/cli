@@ -21,6 +21,19 @@ yargs(hideBin(process.argv)).version(false)
   .parse()
 
 async function _deploySite(site, version) {
+  if (site === 'all') {
+    await _deployAllSites(version);
+    return;
+  }
+
   const { stdout } = await execa('./scripts/deploy', [site, version]);
   console.log(stdout);
+}
+
+async function _deployAllSites(version) {
+  const { stdout } = await execa('ssh', ['biblys', 'ls cloud']);
+  const sites = stdout.split(/\r?\n/);
+  for (const site of sites) {
+    await _deploySite(site, version);
+  }
 }
