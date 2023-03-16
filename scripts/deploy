@@ -24,7 +24,7 @@ current=$(ssh biblys "cd ~/cloud/$site && git describe --tags")
 currentText=${yellow}$current${normal}
 
 if [ $version == $current ]; then
-  echo 1>&2 "> ✅  Version $versionText is already deployed on site $siteText."
+  echo "> ✅  Version $versionText is already deployed on site $siteText."
   exit 0
 fi
 
