@@ -1,0 +1,9 @@
+{
+  "name": "biblys-cli",
+  "version": "0.1",
+  "description": "Biblys Commande Line Interface",
+  "main": "app.js",
+  "author": "Clément Latzarus <c@ltzr.io>",
+  "license": "MIT",
+  "type": "module"
+}
