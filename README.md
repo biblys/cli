@@ -23,3 +23,9 @@ Deploy all sites
 ```shell
 biblys deploy all [version]
 ```
+
+Display a site's current version
+
+```shell
+biblys version [site]
+```
