@@ -34,7 +34,7 @@ async function _deploySite(site, targetVersion) {
 }
 
 async function _deployAllSites(version) {
-  const sitesList = await ssh.run('ls cloud');
+  const sitesList = await ssh.getSitesList();
   const sites = sitesList.split(/\r?\n/);
   for (const site of sites) {
     await _deploySite(site, version);

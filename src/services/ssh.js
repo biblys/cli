@@ -1,4 +1,4 @@
-import { execa } from 'execa';
+import {execa} from 'execa';
 
 export default {
   async run(command) {
@@ -12,5 +12,9 @@ export default {
 
   async getCurrentSiteVersion(site) {
     return await this.runInContext(site, `git describe --tags`);
-  }
+  },
+
+  async getSitesList() {
+    return await this.run('ls cloud');
+  },
 }
