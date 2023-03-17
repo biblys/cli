@@ -1,5 +1,5 @@
-import { execa } from 'execa';
 import chalk from 'chalk';
+import ssh from '../services/ssh.js';
 
 async function deploy(site, version) {
   if (site === 'all') {
@@ -11,7 +11,7 @@ async function deploy(site, version) {
 }
 
 async function _deploySite(site, targetVersion) {
-  const currentVersion = await _sshInSiteContext(site, `git describe --tags`);
+  const currentVersion = await ssh.getCurrentSiteVersion(site);
   if (currentVersion === targetVersion) {
     console.log(`👌 Version ${chalk.yellow(targetVersion)} is already deployed on site ${chalk.blue(site)}.`)
     return;
@@ -21,33 +21,24 @@ async function _deploySite(site, targetVersion) {
   console.log(`⚙️ Upgrading ${chalk.blue(site)} from ${chalk.yellow(currentVersion)} to ${chalk.yellow(targetVersion)}...`);
 
   console.log(`☁️ Fetching latest changes from repository...`);
-  await _sshInSiteContext(site, `git fetch`);
+  await ssh.runInContext(site, `git fetch`);
 
   console.log(`🏹 Changing to tag ${chalk.yellow(targetVersion)}...`);
-  await _sshInSiteContext(site, `git checkout ${targetVersion}`);
+  await ssh.runInContext(site, `git checkout ${targetVersion}`);
 
   console.log(`📦 Installing dependencies...`);
-  await _sshInSiteContext(site, `composer install`);
+  await ssh.runInContext(site, `composer install`);
 
   console.log(`✅  Version ${chalk.yellow(targetVersion)} has been deployed on ${chalk.blue(site)}`);
   console.log('');
 }
 
 async function _deployAllSites(version) {
-  const sitesList = await _ssh('ls cloud');
+  const sitesList = await ssh.run('ls cloud');
   const sites = sitesList.split(/\r?\n/);
   for (const site of sites) {
     await _deploySite(site, version);
   }
-}
-
-async function _ssh(command) {
-  const {stdout} = await execa('ssh', ['biblys', command]);
-  return stdout;
-}
-
-async function _sshInSiteContext(site, command) {
-  return await _ssh(`cd ~/cloud/${site} && ${command}`);
 }
 
 export default deploy;
