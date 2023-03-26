@@ -41,6 +41,15 @@ biblys version all
 ```
 
 
+### `config:get`
+
+Get a config option value for a site
+
+```shell
+biblys config:get [site] [path]
+biblys config:set demo maintenance.enabled
+```
+
 ### `config:set`
 
 Set a config option value for a site's 

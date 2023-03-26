@@ -5,7 +5,7 @@ import { hideBin } from 'yargs/helpers';
 
 import deployCommand from './src/commands/deploy.js';
 import versionCommand from './src/commands/version.js';
-import configCommand from "./src/commands/config.js";
+import { configGetCommand, configSetCommand } from "./src/commands/config.js";
 
 yargs(hideBin(process.argv)).version(false)
   .command('deploy [site] [version]', 'deploy a single site', (yargs) => {
@@ -30,6 +30,19 @@ yargs(hideBin(process.argv)).version(false)
   }, async ({ site }) => {
     await versionCommand(site);
   })
+  .command('config:get [site] [path]', 'get a config option\'s value', (yargs) => {
+    return yargs
+      .positional('site', {
+        describe: 'site to read config option for',
+        type: 'string',
+      })
+      .positional('path', {
+        describe: 'path to config option to get',
+        type: 'string',
+      })
+  }, async ({ site, path }) => {
+    await configGetCommand(site, path);
+  })
   .command('config:set [site] [path] [value]', 'set a config option\'s value', (yargs) => {
     return yargs
       .positional('site', {
@@ -37,7 +50,7 @@ yargs(hideBin(process.argv)).version(false)
         type: 'string',
       })
       .positional('path', {
-        describe: 'path to config option key to update',
+        describe: 'path to config option to set',
         type: 'string',
       })
       .positional('value', {
@@ -45,6 +58,6 @@ yargs(hideBin(process.argv)).version(false)
         type: 'string',
       })
   }, async ({ site, path, value }) => {
-    await configCommand(site, path, value);
+    await configSetCommand(site, path, value);
   })
   .parse()

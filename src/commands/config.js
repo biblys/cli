@@ -2,7 +2,15 @@ import chalk from 'chalk';
 import ssh from '../services/ssh.js';
 import ConfigService from "../services/config.js";
 
-async function configCommand(site, path, value) {
+async function configGetCommand(site, path) {
+  const config = new ConfigService(site);
+  await config.open();
+  const value = config.get(path);
+
+  console.log(`⚙ Option ${chalk.yellow(path)} is set to ${chalk.green(value)} for site ${chalk.blue(site)}`);
+}
+
+async function configSetCommand(site, path, value) {
   if (site === 'all') {
     await _setConfigForAllSites(path, value);
     return;
@@ -37,4 +45,4 @@ async function _setConfigForSite(path, value, site) {
   console.log(`✓ Config option was set to ${chalk.green(value)}.`);
 }
 
-export default configCommand;
+export { configGetCommand, configSetCommand };
