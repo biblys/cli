@@ -1,10 +1,6 @@
-import fs from 'fs/promises';
-import os from 'os';
-
 import chalk from 'chalk';
-import { execa } from 'execa';
-import YAML from 'yaml';
 import ssh from '../services/ssh.js';
+import ConfigService from "../services/config.js";
 
 async function configCommand(site, path, value) {
   if (site === 'all') {
@@ -27,49 +23,18 @@ async function _setConfigForAllSites(path, value) {
 async function _setConfigForSite(path, value, site) {
   console.log(`⚙ Setting option ${chalk.yellow(path)} to ${chalk.green(value)} for site ${chalk.blue(site)}...`);
 
-  const remoteFilePath = `biblys:~/cloud/${site}/app/config.yml`;
-  const localFilePath = `${os.tmpdir()}/config.yml`;
+  const config = new ConfigService(site);
+  await config.open();
 
-  const config = await _readConfig(remoteFilePath, localFilePath);
-  _updateConfigOptionValue(config, path, value);
-  await _writeConfig(config, localFilePath, remoteFilePath);
+  const formerValue = config.get(path);
+  if (formerValue) {
+    console.log(`ⓘ Former value for ${chalk.yellow(path)} was ${chalk.magenta(formerValue)}`);
+  }
+
+  config.set(path, value);
+  await config.save();
 
   console.log(`✓ Config option was set to ${chalk.green(value)}.`);
-}
-
-async function _readConfig(remoteFilePath, localFilePath) {
-  await execa('scp', [remoteFilePath, localFilePath]);
-  const configFileContent = await fs.readFile(localFilePath, {encoding: 'utf-8'});
-  return YAML.parseDocument(configFileContent);
-}
-
-function _updateConfigOptionValue(config, pathAsString, value) {
-  const path = pathAsString.split('.');
-
-  const formerValue = config.getIn(path);
-  if (formerValue) {
-    console.log(`ⓘ Former value for ${chalk.yellow(pathAsString)} was ${chalk.magenta(formerValue)}`);
-  }
-
-  config.setIn(path, _normalizeValue(value));
-}
-
-async function _writeConfig(config, localFilePath, remoteFilePath) {
-  const updatedConfigFileContent = config.toString();
-  await fs.writeFile(localFilePath, updatedConfigFileContent);
-  await execa('scp', [localFilePath, remoteFilePath]);
-}
-
-function _normalizeValue(value) {
-  if (value === "true") {
-    return true;
-  }
-
-  if (value === "false") {
-    return false;
-  }
-
-  return value;
 }
 
 export default configCommand;
