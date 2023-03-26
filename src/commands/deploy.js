@@ -1,5 +1,6 @@
 import chalk from 'chalk';
 import ssh from '../services/ssh.js';
+import ConfigService from "../services/config.js";
 
 async function deployCommand(site, version) {
   if (site === 'all') {
@@ -20,6 +21,13 @@ async function _deploySite(site, targetVersion) {
   console.log('');
   console.log(`⚙ Upgrading ${chalk.blue(site)} from ${chalk.yellow(currentVersion)} to ${chalk.yellow(targetVersion)}...`);
 
+  console.log(`⚙ Enabling maintenance mode...`);
+  const config = new ConfigService(site);
+  await config.open();
+  config.set('maintenance.enabled', true);
+  config.set('maintenance.message', 'Mise à jour en cours, merci de réessayer dans quelques minutes…');
+  await config.save();
+
   console.log(`⚙ Fetching latest changes from repository...`);
   await ssh.runInContext(site, `git fetch`);
 
@@ -28,6 +36,11 @@ async function _deploySite(site, targetVersion) {
 
   console.log(`⚙ Installing dependencies...`);
   await ssh.runInContext(site, `composer install`);
+
+  console.log(`⚙ Disabling maintenance mode...`);
+  await config.open();
+  config.set('maintenance.enabled', false);
+  await config.save();
 
   console.log(`✓ Version ${chalk.yellow(targetVersion)} has been deployed on ${chalk.blue(site)}`);
   console.log('');
