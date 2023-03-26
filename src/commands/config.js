@@ -15,7 +15,7 @@ async function configCommand(site, path, value) {
   _updateConfigOptionValue(config, path, value);
   await _writeConfig(config, localFilePath, remoteFilePath);
 
-  console.log(`✓️Config option was set to ${chalk.green(value)}.`);
+  console.log(`✓ Config option was set to ${chalk.green(value)}.`);
 }
 
 async function _readConfig(remoteFilePath, localFilePath) {

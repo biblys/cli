@@ -18,18 +18,18 @@ async function _deploySite(site, targetVersion) {
   }
 
   console.log('');
-  console.log(`⚙️ Upgrading ${chalk.blue(site)} from ${chalk.yellow(currentVersion)} to ${chalk.yellow(targetVersion)}...`);
+  console.log(`⚙ Upgrading ${chalk.blue(site)} from ${chalk.yellow(currentVersion)} to ${chalk.yellow(targetVersion)}...`);
 
-  console.log(`☁️ Fetching latest changes from repository...`);
+  console.log(`⚙ Fetching latest changes from repository...`);
   await ssh.runInContext(site, `git fetch`);
 
-  console.log(`🏹 Changing to tag ${chalk.yellow(targetVersion)}...`);
+  console.log(`⚙ Changing to tag ${chalk.yellow(targetVersion)}...`);
   await ssh.runInContext(site, `git checkout ${targetVersion}`);
 
-  console.log(`📦 Installing dependencies...`);
+  console.log(`⚙ Installing dependencies...`);
   await ssh.runInContext(site, `composer install`);
 
-  console.log(`✅  Version ${chalk.yellow(targetVersion)} has been deployed on ${chalk.blue(site)}`);
+  console.log(`✓ Version ${chalk.yellow(targetVersion)} has been deployed on ${chalk.blue(site)}`);
   console.log('');
 }
 

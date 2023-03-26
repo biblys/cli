@@ -12,7 +12,7 @@ async function versionCommand(site) {
 
 async function _displaySiteVersion(site) {
   const version = await ssh.getCurrentSiteVersion(site);
-  console.log(`ℹ️ Version ${chalk.yellow(version)} is deployed on site ${chalk.blue(site)}`);
+  console.log(`ⓘ️ Version ${chalk.yellow(version)} is deployed on site ${chalk.blue(site)}`);
 }
 
 async function _displayAllSitesVersion() {
