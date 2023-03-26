@@ -1,7 +1,7 @@
 import ssh from "../services/ssh.js";
 import chalk from "chalk";
 
-async function version(site) {
+async function versionCommand(site) {
   if (site === "all") {
     await _displayAllSitesVersion();
     return;
@@ -23,4 +23,4 @@ async function _displayAllSitesVersion() {
   }
 }
 
-export default version;
+export default versionCommand;

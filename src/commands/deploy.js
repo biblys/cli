@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import ssh from '../services/ssh.js';
 
-async function deploy(site, version) {
+async function deployCommand(site, version) {
   if (site === 'all') {
     await _deployAllSites(version);
     return;
@@ -41,4 +41,4 @@ async function _deployAllSites(version) {
   }
 }
 
-export default deploy;
+export default deployCommand;
