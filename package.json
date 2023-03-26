@@ -12,6 +12,7 @@
   "dependencies": {
     "chalk": "^5.2.0",
     "execa": "^7.1.1",
+    "yaml": "^2.2.1",
     "yargs": "^17.7.1"
   }
 }
