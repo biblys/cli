@@ -51,13 +51,25 @@ function _updateConfigOptionValue(config, pathAsString, value) {
     console.log(`ⓘ Former value for ${chalk.yellow(pathAsString)} was ${chalk.magenta(formerValue)}`);
   }
 
-  config.setIn(path, value);
+  config.setIn(path, _normalizeValue(value));
 }
 
 async function _writeConfig(config, localFilePath, remoteFilePath) {
   const updatedConfigFileContent = config.toString();
   await fs.writeFile(localFilePath, updatedConfigFileContent);
   await execa('scp', [localFilePath, remoteFilePath]);
+}
+
+function _normalizeValue(value) {
+  if (value === "true") {
+    return true;
+  }
+
+  if (value === "false") {
+    return false;
+  }
+
+  return value;
 }
 
 export default configCommand;
