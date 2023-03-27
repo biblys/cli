@@ -18,32 +18,30 @@ async function _deploySite(site, targetVersion) {
     return;
   }
 
-  console.log('');
-  console.log(`⚙ Upgrading ${chalk.blue(site)} from ${chalk.yellow(currentVersion)} to ${chalk.yellow(targetVersion)}...`);
+  console.log(`${chalk.yellow('⚙')} Upgrading ${chalk.blue(site)} from ${chalk.yellow(currentVersion)} to ${chalk.yellow(targetVersion)}...`);
 
-  console.log(`⚙ Enabling maintenance mode...`);
+  console.log(`${chalk.yellow('⚙')} Enabling maintenance mode...`);
   const config = new ConfigService(site);
   await config.open();
   config.set('maintenance.enabled', true);
   config.set('maintenance.message', 'Mise à jour en cours, merci de réessayer dans quelques minutes…');
   await config.save();
 
-  console.log(`⚙ Fetching latest changes from repository...`);
+  console.log(`${chalk.yellow('⚙')} Updating local repository...`);
   await ssh.runInContext(site, `git fetch`);
 
-  console.log(`⚙ Changing to tag ${chalk.yellow(targetVersion)}...`);
+  console.log(`${chalk.yellow('⚙')} Installing Biblys ${chalk.yellow(targetVersion)}...`);
   await ssh.runInContext(site, `git checkout ${targetVersion}`);
 
-  console.log(`⚙ Installing dependencies...`);
+  console.log(`${chalk.yellow('⚙')} Installing dependencies...`);
   await ssh.runInContext(site, `composer install`);
 
-  console.log(`⚙ Disabling maintenance mode...`);
+  console.log(`${chalk.yellow('⚙')} Disabling maintenance mode...`);
   await config.open();
   config.set('maintenance.enabled', false);
   await config.save();
 
-  console.log(`✓ Version ${chalk.yellow(targetVersion)} has been deployed on ${chalk.blue(site)}`);
-  console.log('');
+  console.log(`${chalk.green('✓')} Version ${chalk.yellow(targetVersion)} has been deployed on ${chalk.blue(site)}`);
 }
 
 async function _deployAllSites(version) {
@@ -51,6 +49,7 @@ async function _deployAllSites(version) {
   const sites = sitesList.split(/\r?\n/);
   for (const site of sites) {
     await _deploySite(site, version);
+    console.log('');
   }
 }
 
