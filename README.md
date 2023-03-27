@@ -56,18 +56,17 @@ Get a config option value for all sites
 biblys config:get [site] [path]
 ```
 
-
 ### `config:set`
 
-Set a config option value for a site's 
+Set a config option value for a site
 
 ```shell
-biblys config:set [site] [path] [value]
-biblys config:set demo maintenance.enabled true
+biblys config:set [site] [path]=[value]
+biblys config:set demo maintenance.enabled=true
 ```
 
 Set a config option value for all sites
 
 ```shell
-biblys config:set [site] [path] [value]
+biblys config:set [site] [path]=[value]
 ```

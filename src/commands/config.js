@@ -27,25 +27,26 @@ async function _getConfigForAllSites(path) {
   }
 }
 
-async function configSetCommand(site, path, value) {
+async function configSetCommand(site, update) {
   if (site === 'all') {
-    await _setConfigForAllSites(path, value);
+    await _setConfigForAllSites(update);
     return;
   }
 
-  await _setConfigForSite(path, value, site);
+  await _setConfigForSite(update, site);
 }
 
-async function _setConfigForAllSites(path, value) {
+async function _setConfigForAllSites(update) {
   const sitesList = await ssh.getSitesList();
   const sites = sitesList.split(/\r?\n/);
   for (const site of sites) {
-    await _setConfigForSite(path, value, site);
+    await _setConfigForSite(update, site);
     console.log('');
   }
 }
 
-async function _setConfigForSite(path, value, site) {
+async function _setConfigForSite(update, site) {
+  const [path, value] = update.split('=');
   console.log(`⚙ Setting option ${chalk.yellow(path)} to ${chalk.green(value)} for site ${chalk.blue(site)}...`);
 
   const config = new ConfigService(site);
