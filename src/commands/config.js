@@ -27,40 +27,39 @@ async function _getConfigForAllSites(path) {
   }
 }
 
-async function configSetCommand(site, update) {
+async function configSetCommand(site, updates) {
   if (site === 'all') {
-    await _setConfigForAllSites(update);
+    await _setConfigForAllSites(updates);
     return;
   }
 
-  await _setConfigForSite(update, site);
+  await _setConfigForSite(updates, site);
 }
 
-async function _setConfigForAllSites(update) {
+async function _setConfigForAllSites(updates) {
   const sitesList = await ssh.getSitesList();
   const sites = sitesList.split(/\r?\n/);
   for (const site of sites) {
-    await _setConfigForSite(update, site);
+    await _setConfigForSite(updates, site);
     console.log('');
   }
 }
 
-async function _setConfigForSite(update, site) {
-  const [path, value] = update.split('=');
-  console.log(`⚙ Setting option ${chalk.yellow(path)} to ${chalk.green(value)} for site ${chalk.blue(site)}...`);
+async function _setConfigForSite(updates, site) {
 
   const config = new ConfigService(site);
   await config.open();
+  console.log(`${chalk.yellow('⚙')} Updating config for site ${chalk.blue(site)}…`);
 
-  const formerValue = config.get(path);
-  if (formerValue) {
-    console.log(`ⓘ Former value for ${chalk.yellow(path)} was ${chalk.magenta(formerValue)}`);
+  for (const update of updates) {
+    const [path, value] = update.split('=');
+    const formerValue = config.get(path);
+    config.set(path, value);
+    console.log(`  ${chalk.yellow('-')} ${chalk.yellow(path)}: ${chalk.magenta(formerValue)} => ${chalk.green(value)}`);
   }
 
-  config.set(path, value);
   await config.save();
-
-  console.log(`✓ Config option was set to ${chalk.green(value)}.`);
+  console.log(`${chalk.green('✓')} Config for site ${chalk.blue(site)} was saved!`);
 }
 
 export { configGetCommand, configSetCommand };

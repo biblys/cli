@@ -61,7 +61,7 @@ biblys config:get [site] [path]
 Set a config option value for a site
 
 ```shell
-biblys config:set [site] [path]=[value]
+biblys config:set [site] [path]=[value] [path]=[value]
 biblys config:set demo maintenance.enabled=true
 ```
 

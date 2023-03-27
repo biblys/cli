@@ -43,17 +43,17 @@ yargs(hideBin(process.argv)).version(false)
   }, async ({ site, path }) => {
     await configGetCommand(site, path);
   })
-  .command('config:set [site] [update]', 'set a config option\'s value', (yargs) => {
+  .command('config:set [site] [updates...]', 'set a config option\'s value', (yargs) => {
     return yargs
       .positional('site', {
         describe: 'site to update config option for',
         type: 'string',
       })
-      .positional('update', {
-        describe: 'config to update as [path]=[new value]',
-        type: 'string',
+      .positional('updates', {
+        describe: 'options to updates [path]=[new value] [path]=[new value] …',
+        type: 'array',
       })
-  }, async ({ site, update }) => {
-    await configSetCommand(site, update);
+  }, async ({ site, updates }) => {
+    await configSetCommand(site, updates);
   })
   .parse()
