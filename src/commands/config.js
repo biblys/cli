@@ -3,11 +3,28 @@ import ssh from '../services/ssh.js';
 import ConfigService from "../services/config.js";
 
 async function configGetCommand(site, path) {
+  if (site === 'all') {
+    await _getConfigForAllSites(path);
+    return;
+  }
+
+  await _getConfigForSite(path, site);
+}
+
+async function _getConfigForSite(path, site) {
   const config = new ConfigService(site);
   await config.open();
   const value = config.get(path);
 
-  console.log(`⚙ Option ${chalk.yellow(path)} is set to ${chalk.green(value)} for site ${chalk.blue(site)}`);
+  console.log(`ⓘ Option ${chalk.yellow(path)} is set to ${chalk.green(value)} for site ${chalk.blue(site)}`);
+}
+
+async function _getConfigForAllSites(path) {
+  const sitesList = await ssh.getSitesList();
+  const sites = sitesList.split(/\r?\n/);
+  for (const site of sites) {
+    await _getConfigForSite(path, site);
+  }
 }
 
 async function configSetCommand(site, path, value) {

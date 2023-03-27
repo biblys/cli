@@ -50,6 +50,13 @@ biblys config:get [site] [path]
 biblys config:set demo maintenance.enabled
 ```
 
+Get a config option value for all sites
+
+```shell
+biblys config:get [site] [path]
+```
+
+
 ### `config:set`
 
 Set a config option value for a site's 
