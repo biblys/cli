@@ -33,6 +33,11 @@ async function _deploySite(site, targetVersion) {
   console.log(`${chalk.yellow('⚙')} Installing Biblys ${chalk.yellow(targetVersion)}...`);
   await ssh.runInContext(site, `git checkout ${targetVersion}`);
 
+  if (targetVersion === 'dev') {
+    console.log(`${chalk.yellow('⚙')} Ensuring latest development version is installed...`);
+    await ssh.runInContext(site, `git reset --hard origin/dev`);
+  }
+
   console.log(`${chalk.yellow('⚙')} Installing dependencies...`);
   await ssh.runInContext(site, `composer install`);
 
