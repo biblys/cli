@@ -20,6 +20,12 @@ Deploy a site
 biblys deploy [site] [version]
 ```
 
+Deploy several sites
+
+```shell
+biblys deploy [site1],[site2],[site3] [version]
+```
+
 Deploy all sites
 
 ```shell
