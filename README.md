@@ -76,3 +76,11 @@ Set a config option value for all sites
 ```shell
 biblys config:set [site] [path]=[value]
 ```
+
+### `theme:update`
+
+Update a site's theme to its latest version
+
+```shell
+biblys theme:update [site]
+```

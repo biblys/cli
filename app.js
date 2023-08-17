@@ -6,6 +6,7 @@ import { hideBin } from 'yargs/helpers';
 import deployCommand from './src/commands/deploy.js';
 import versionCommand from './src/commands/version.js';
 import { configGetCommand, configSetCommand } from "./src/commands/config.js";
+import themeUpdateCommand from "./src/commands/theme.js";
 
 yargs(hideBin(process.argv)).version(false)
   .command('deploy [site] [version]', 'deploy a single site', (yargs) => {
@@ -55,5 +56,14 @@ yargs(hideBin(process.argv)).version(false)
       })
   }, async ({ site, updates }) => {
     await configSetCommand(site, updates);
+  })
+  .command('theme:update [site]', 'deploys a site\'s theme\' last version', (yargs) => {
+    return yargs
+      .positional('site', {
+        describe: 'site to update themes',
+        type: 'string',
+      })
+  }, async ({ site }) => {
+    await themeUpdateCommand(site);
   })
   .parse()
