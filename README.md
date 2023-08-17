@@ -12,24 +12,32 @@ npm install -g .
 
 ## Usage
 
+All commands can be run for one site, several sites or all sites
+
+Run for one site
+
+```shell
+biblys [command] [site] [...arguments]
+```
+
+Run for several sites
+
+```shell
+biblys [command] [site1,site2,site3] [...arguments]
+```
+
+Run for all sites
+
+```shell
+biblys [command] all [...arguments]
+```
+
 ### `deploy`
 
 Deploy a site
 
 ```shell
 biblys deploy [site] [version]
-```
-
-Deploy several sites
-
-```shell
-biblys deploy [site1],[site2],[site3] [version]
-```
-
-Deploy all sites
-
-```shell
-biblys deploy all [version]
 ```
 
 ### `version`
@@ -40,13 +48,6 @@ Display a site's current version
 biblys version [site]
 ```
 
-Display all sites current version
-
-```shell
-biblys version all
-```
-
-
 ### `config:get`
 
 Get a config option value for a site
@@ -56,12 +57,6 @@ biblys config:get [site] [path]
 biblys config:set demo maintenance.enabled
 ```
 
-Get a config option value for all sites
-
-```shell
-biblys config:get [site] [path]
-```
-
 ### `config:set`
 
 Set a config option value for a site
@@ -69,12 +64,6 @@ Set a config option value for a site
 ```shell
 biblys config:set [site] [path]=[value] [path]=[value]
 biblys config:set demo maintenance.enabled=true
-```
-
-Set a config option value for all sites
-
-```shell
-biblys config:set [site] [path]=[value]
 ```
 
 ### `theme:update`

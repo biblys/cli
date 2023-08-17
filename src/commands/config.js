@@ -1,17 +1,14 @@
 import chalk from 'chalk';
-import ssh from '../services/ssh.js';
+
 import ConfigService from "../services/config.js";
+import CommandExecutor from "../services/CommandExecutor.js";
 
-async function configGetCommand(site, path) {
-  if (site === 'all') {
-    await _getConfigForAllSites(path);
-    return;
-  }
-
-  await _getConfigForSite(path, site);
+async function configGetCommand(target, path) {
+  const command = new CommandExecutor((site) => _getConfigForSite(site, path))
+  await command.executeForTarget(target)
 }
 
-async function _getConfigForSite(path, site) {
+async function _getConfigForSite(site, path) {
   const config = new ConfigService(site);
   await config.open();
   const value = config.get(path);
@@ -19,33 +16,12 @@ async function _getConfigForSite(path, site) {
   console.log(`ⓘ Option ${chalk.yellow(path)} is set to ${chalk.green(value)} for site ${chalk.blue(site)}`);
 }
 
-async function _getConfigForAllSites(path) {
-  const sitesList = await ssh.getSitesList();
-  const sites = sitesList.split(/\r?\n/);
-  for (const site of sites) {
-    await _getConfigForSite(path, site);
-  }
+async function configSetCommand(target, updates) {
+  const command = new CommandExecutor((site) => _setConfigForSite(site, updates))
+  await command.executeForTarget(target)
 }
 
-async function configSetCommand(site, updates) {
-  if (site === 'all') {
-    await _setConfigForAllSites(updates);
-    return;
-  }
-
-  await _setConfigForSite(updates, site);
-}
-
-async function _setConfigForAllSites(updates) {
-  const sitesList = await ssh.getSitesList();
-  const sites = sitesList.split(/\r?\n/);
-  for (const site of sites) {
-    await _setConfigForSite(updates, site);
-    console.log('');
-  }
-}
-
-async function _setConfigForSite(updates, site) {
+async function _setConfigForSite(site, updates) {
 
   const config = new ConfigService(site);
   await config.open();

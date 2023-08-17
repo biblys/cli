@@ -1,20 +1,12 @@
 import chalk from 'chalk';
+
 import ssh from '../services/ssh.js';
 import ConfigService from "../services/config.js";
+import CommandExecutor from "../services/CommandExecutor.js";
 
 async function deployCommand(target, version) {
-  if (target === 'all') {
-    await _deployAllSites(version);
-    return;
-  }
-
-  if (target.includes(',')) {
-    const sites = target.split(',');
-    await _deploySites(sites, version);
-    return;
-  }
-
-  await _deploySite(target, version);
+  const command = new CommandExecutor((site) => _deploySite(site, version))
+  await command.executeForTarget(target)
 }
 
 async function _deploySite(site, targetVersion) {
@@ -53,19 +45,6 @@ async function _deploySite(site, targetVersion) {
   await config.save();
 
   console.log(`${chalk.green('✓')} Version ${chalk.yellow(targetVersion)} has been deployed on ${chalk.blue(site)}`);
-}
-
-async function _deploySites(sites, version) {
-  for (const site of sites) {
-    await _deploySite(site, version);
-    console.log('');
-  }
-}
-
-async function _deployAllSites(version) {
-  const sitesList = await ssh.getSitesList();
-  const sites = sitesList.split(/\r?\n/);
-  await _deploySites(sites, version);
 }
 
 export default deployCommand;
