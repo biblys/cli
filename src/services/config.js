@@ -27,6 +27,11 @@ class ConfigService {
     this.config.setIn(path, this._normalizeValue(value));
   }
 
+  del(pathAsString) {
+    const path = pathAsString.split('.');
+    this.config.deleteIn(path);
+  }
+
   async save() {
     const updatedConfigFileContent = this.config.toString();
     await fs.writeFile(this.localFilePath, updatedConfigFileContent);

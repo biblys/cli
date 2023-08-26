@@ -38,4 +38,21 @@ async function _setConfigForSite(site, updates) {
   console.log(`${chalk.green('✓')} Config for site ${chalk.blue(site)} was saved!`);
 }
 
-export { configGetCommand, configSetCommand };
+async function _delConfigForSite(site, path) {
+  const config = new ConfigService(site);
+  await config.open();
+
+  const formerValue = config.get(path);
+  config.del(path);
+
+  await config.save();
+
+  console.log(`ⓘ Option ${chalk.yellow(path)} was deleted for site ${chalk.blue(site)} (was ${chalk.magenta(formerValue)})`);
+}
+
+async function configDelCommand(target, updates) {
+  const command = new CommandExecutor((site) => _delConfigForSite(site, updates))
+  await command.executeForTarget(target)
+}
+
+export { configGetCommand, configSetCommand, configDelCommand };

@@ -66,6 +66,15 @@ biblys config:set [site] [path]=[value] [path]=[value]
 biblys config:set demo maintenance.enabled=true
 ```
 
+### `config:del`
+
+Deletes a config option value for a site
+
+```shell
+biblys config:del [site] [path]=[value] [path]=[value]
+biblys config:del demo maintenance.message
+```
+
 ### `theme:update`
 
 Update a site's theme to its latest version

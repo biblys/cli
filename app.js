@@ -5,7 +5,7 @@ import { hideBin } from 'yargs/helpers';
 
 import deployCommand from './src/commands/deploy.js';
 import versionCommand from './src/commands/version.js';
-import { configGetCommand, configSetCommand } from "./src/commands/config.js";
+import {configDelCommand, configGetCommand, configSetCommand} from "./src/commands/config.js";
 import themeUpdateCommand from "./src/commands/theme.js";
 
 yargs(hideBin(process.argv)).version(false)
@@ -56,6 +56,19 @@ yargs(hideBin(process.argv)).version(false)
       })
   }, async ({ site, updates }) => {
     await configSetCommand(site, updates);
+  })
+  .command('config:del [site] [path]', 'delete a config option', (yargs) => {
+    return yargs
+      .positional('site', {
+        describe: 'site to read config option for',
+        type: 'string',
+      })
+      .positional('path', {
+        describe: 'path to config option to delete',
+        type: 'string',
+      })
+  }, async ({ site, path }) => {
+    await configDelCommand(site, path);
   })
   .command('theme:update [site]', 'deploys a site\'s theme\' last version', (yargs) => {
     return yargs
