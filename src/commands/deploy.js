@@ -27,6 +27,7 @@ async function _deploySite(site, targetVersion) {
 
   console.log(`${chalk.yellow('⚙')} Updating local repository...`);
   await ssh.runInContext(site, `git fetch`);
+  await ssh.runInContext(site, `git fetch --tags`);
 
   console.log(`${chalk.yellow('⚙')} Installing Biblys ${chalk.yellow(targetVersion)}...`);
   await ssh.runInContext(site, `git checkout ${targetVersion}`);
