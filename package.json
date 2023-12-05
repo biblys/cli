@@ -1,6 +1,6 @@
 {
   "name": "biblys-cli",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Biblys Commande Line Interface",
   "main": "app.js",
   "author": "Clément Latzarus <c@ltzr.io>",
