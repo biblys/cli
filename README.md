@@ -82,3 +82,11 @@ Update a site's theme to its latest version
 ```shell
 biblys theme:update [site]
 ```
+
+### `theme:switch`
+
+Replace current site theme with another one
+
+```shell
+biblys theme:switch [current] [target]
+```

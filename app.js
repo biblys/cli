@@ -6,7 +6,7 @@ import { hideBin } from 'yargs/helpers';
 import deployCommand from './src/commands/deploy.js';
 import versionCommand from './src/commands/version.js';
 import {configDelCommand, configGetCommand, configSetCommand} from "./src/commands/config.js";
-import {themeUpdateCommand} from "./src/commands/theme.js";
+import {switchThemeCommand, themeUpdateCommand} from "./src/commands/theme.js";
 
 yargs(hideBin(process.argv)).version(false)
   .command('deploy [site] [version]', 'deploy a single site', (yargs) => {
@@ -78,5 +78,18 @@ yargs(hideBin(process.argv)).version(false)
       })
   }, async ({ site }) => {
     await themeUpdateCommand(site);
+  })
+  .command('theme:switch [current] [target]', `replaces current site's theme with another`, (yargs) => {
+    return yargs
+      .positional('current', {
+        describe: 'current site name',
+        type: 'string',
+      })
+      .positional('target', {
+        describe: 'target site name',
+        type: 'string',
+      })
+  }, async ({ current, target }) => {
+    await switchThemeCommand(current, target);
   })
   .parse()
