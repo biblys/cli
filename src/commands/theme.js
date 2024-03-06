@@ -3,7 +3,7 @@ import chalk from "chalk";
 import ssh from "../services/ssh.js";
 import CommandExecutor from "../services/CommandExecutor.js";
 
-async function themeUpdateCommand(target) {
+export async function themeUpdateCommand(target) {
   const command = new CommandExecutor(updateThemeForSite);
   await command.executeForTarget(target);
 }
@@ -17,5 +17,3 @@ async function updateThemeForSite(site) {
 
   console.log(`${chalk.green('✓')} Updated ${chalk.blue(site)}'s to latest version`);
 }
-
-export default themeUpdateCommand;

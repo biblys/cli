@@ -6,7 +6,7 @@ import { hideBin } from 'yargs/helpers';
 import deployCommand from './src/commands/deploy.js';
 import versionCommand from './src/commands/version.js';
 import {configDelCommand, configGetCommand, configSetCommand} from "./src/commands/config.js";
-import themeUpdateCommand from "./src/commands/theme.js";
+import {themeUpdateCommand} from "./src/commands/theme.js";
 
 yargs(hideBin(process.argv)).version(false)
   .command('deploy [site] [version]', 'deploy a single site', (yargs) => {
