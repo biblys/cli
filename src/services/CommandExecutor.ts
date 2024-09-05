@@ -2,11 +2,11 @@ import ssh from "./ssh.js";
 
 export default class CommandExecutor
 {
-  constructor(command) {
+  constructor(private readonly command: (site: string) => {}) {
     this.command = command;
   }
 
-  async executeForTarget(target) {
+  async executeForTarget(target: string) {
     if (target === "all") {
       await this.#executeForAllSites();
       return;
@@ -21,11 +21,11 @@ export default class CommandExecutor
     await this.#execute(target);
   }
 
-  async #execute(site) {
+  async #execute(site: string) {
     await this.command(site);
   }
 
-  async #executeForSomeSites(sites) {
+  async #executeForSomeSites(sites: string[]) {
     for (const site of sites) {
       await this.#execute(site);
       console.log('');

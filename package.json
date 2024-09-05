@@ -6,13 +6,21 @@
   "author": "Clément Latzarus <c@ltzr.io>",
   "license": "MIT",
   "type": "module",
+  "scripts": {
+    "build": "tsc"
+  },
   "bin": {
-    "biblys": "./app.js"
+    "biblys": "./build/app.js"
   },
   "dependencies": {
     "chalk": "^5.2.0",
     "execa": "^7.1.1",
     "yaml": "^2.2.1",
     "yargs": "^17.7.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.4",
+    "@types/yargs": "^17.0.33",
+    "typescript": "^5.5.4"
   }
 }

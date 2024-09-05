@@ -3,12 +3,12 @@ import chalk from 'chalk';
 import ConfigService from "../services/config.js";
 import CommandExecutor from "../services/CommandExecutor.js";
 
-async function configGetCommand(target, path) {
-  const command = new CommandExecutor((site) => _getConfigForSite(site, path))
+async function configGetCommand(target: string, path: string) {
+  const command = new CommandExecutor((site: string) => _getConfigForSite(site, path))
   await command.executeForTarget(target)
 }
 
-async function _getConfigForSite(site, path) {
+async function _getConfigForSite(site: string, path: string) {
   const config = new ConfigService(site);
   await config.open();
   const value = config.get(path);
@@ -16,12 +16,12 @@ async function _getConfigForSite(site, path) {
   console.log(`ⓘ Option ${chalk.yellow(path)} is set to ${chalk.green(value)} for site ${chalk.blue(site)}`);
 }
 
-async function configSetCommand(target, updates) {
-  const command = new CommandExecutor((site) => _setConfigForSite(site, updates))
+async function configSetCommand(target: string, updates: string) {
+  const command = new CommandExecutor((site: string) => _setConfigForSite(site, updates))
   await command.executeForTarget(target)
 }
 
-async function _setConfigForSite(site, updates) {
+async function _setConfigForSite(site: string, updates: string) {
 
   const config = new ConfigService(site);
   await config.open();
@@ -38,7 +38,7 @@ async function _setConfigForSite(site, updates) {
   console.log(`${chalk.green('✓')} Config for site ${chalk.blue(site)} was saved!`);
 }
 
-async function _delConfigForSite(site, path) {
+async function _delConfigForSite(site: string, path: string) {
   const config = new ConfigService(site);
   await config.open();
 
@@ -50,8 +50,8 @@ async function _delConfigForSite(site, path) {
   console.log(`ⓘ Option ${chalk.yellow(path)} was deleted for site ${chalk.blue(site)} (was ${chalk.magenta(formerValue)})`);
 }
 
-async function configDelCommand(target, updates) {
-  const command = new CommandExecutor((site) => _delConfigForSite(site, updates))
+async function configDelCommand(target: string, updates: string) {
+  const command = new CommandExecutor((site: string) => _delConfigForSite(site, updates))
   await command.executeForTarget(target)
 }
 

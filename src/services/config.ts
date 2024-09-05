@@ -2,13 +2,16 @@ import os from "os";
 import fs from "fs/promises";
 
 import { execa } from "execa";
-import YAML from "yaml";
+import YAML, {Document} from "yaml";
 
 class ConfigService {
-  constructor(site) {
+  private readonly remoteFilePath: string;
+  private readonly localFilePath: string;
+  private config: Document.Parsed|undefined;
+
+  constructor(site: string) {
     this.remoteFilePath = `biblys:~/cloud/${site}/app/config.yml`;
     this.localFilePath = `${os.tmpdir()}/config.yml`;
-    this.config = undefined;
   }
 
   async open() {
@@ -17,28 +20,44 @@ class ConfigService {
     this.config = YAML.parseDocument(configFileContent);
   }
 
-  get(pathAsString) {
+  get(pathAsString: string) {
+    if (!this.config) {
+      throw new Error("Config was not loaded");
+    }
+
     const path = pathAsString.split('.');
     return this.config.getIn(path);
   }
 
-  set(pathAsString, value) {
+  set(pathAsString: string, value: string) {
+    if (!this.config) {
+      throw new Error("Config was not loaded");
+    }
+
     const path = pathAsString.split('.');
     this.config.setIn(path, this._normalizeValue(value));
   }
 
-  del(pathAsString) {
+  del(pathAsString: string) {
+    if (!this.config) {
+      throw new Error("Config was not loaded");
+    }
+
     const path = pathAsString.split('.');
     this.config.deleteIn(path);
   }
 
   async save() {
+    if (!this.config) {
+      throw new Error("Config was not loaded");
+    }
+
     const updatedConfigFileContent = this.config.toString();
     await fs.writeFile(this.localFilePath, updatedConfigFileContent);
     await execa('scp', [this.localFilePath, this.remoteFilePath]);
   }
 
-  _normalizeValue(value) {
+  _normalizeValue(value: string) {
     if (value === "true") {
       return true;
     }

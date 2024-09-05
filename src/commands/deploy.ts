@@ -4,12 +4,12 @@ import ssh from '../services/ssh.js';
 import ConfigService from "../services/config.js";
 import CommandExecutor from "../services/CommandExecutor.js";
 
-async function deployCommand(target, version) {
+async function deployCommand(target: string, version: string) {
   const command = new CommandExecutor((site) => _deploySite(site, version))
   await command.executeForTarget(target)
 }
 
-async function _deploySite(site, targetVersion) {
+async function _deploySite(site: string, targetVersion: string) {
   const currentVersion = await ssh.getCurrentSiteVersion(site);
   if (currentVersion === targetVersion) {
     console.log(`👌 Version ${chalk.yellow(targetVersion)} is already deployed on site ${chalk.blue(site)}.`)
@@ -21,7 +21,7 @@ async function _deploySite(site, targetVersion) {
   console.log(`${chalk.yellow('⚙')} Enabling maintenance mode...`);
   const config = new ConfigService(site);
   await config.open();
-  config.set('maintenance.enabled', true);
+  config.set('maintenance.enabled', "true");
   config.set('maintenance.message', 'Mise à jour en cours, merci de réessayer dans quelques minutes…');
   await config.save();
 
@@ -42,7 +42,7 @@ async function _deploySite(site, targetVersion) {
 
   console.log(`${chalk.yellow('⚙')} Disabling maintenance mode...`);
   await config.open();
-  config.set('maintenance.enabled', false);
+  config.set('maintenance.enabled', "false");
   await config.save();
 
   console.log(`${chalk.green('✓')} Version ${chalk.yellow(targetVersion)} has been deployed on ${chalk.blue(site)}`);
