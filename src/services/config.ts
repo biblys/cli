@@ -3,14 +3,15 @@ import fs from "fs/promises";
 
 import { execa } from "execa";
 import YAML, {Document} from "yaml";
+import {Site} from "../types.js";
 
 class ConfigService {
   private readonly remoteFilePath: string;
   private readonly localFilePath: string;
   private config: Document.Parsed|undefined;
 
-  constructor(site: string) {
-    this.remoteFilePath = `biblys:~/cloud/${site}/app/config.yml`;
+  constructor(site: Site) {
+    this.remoteFilePath = `biblys:~/cloud/${site.name}/app/config.yml`;
     this.localFilePath = `${os.tmpdir()}/config.yml`;
   }
 

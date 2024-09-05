@@ -1,4 +1,5 @@
 import {execa} from 'execa';
+import {Site} from "../types.js";
 
 export default {
   async run(command: string) {
@@ -6,11 +7,11 @@ export default {
     return stdout;
   },
 
-  async runInContext(context: string, command: string) {
-    return await this.run(`cd ~/cloud/${context} && ${command}`);
+  async runInContext(site: Site, command: string) {
+    return await this.run(`cd ~/cloud/${site.name} && ${command}`);
   },
 
-  async getCurrentSiteVersion(site: string) {
+  async getCurrentSiteVersion(site: Site) {
     return await this.runInContext(site, `git describe --tags`);
   },
 

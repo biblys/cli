@@ -3,20 +3,21 @@ import chalk from "chalk";
 import ssh from "../services/ssh.js";
 import CommandExecutor from "../services/CommandExecutor.js";
 import {execa} from "execa";
+import {Site} from "../types.js";
 
 export async function themeUpdateCommand(target: string) {
   const command = new CommandExecutor(updateThemeForSite);
   await command.executeForTarget(target);
 }
 
-async function updateThemeForSite(site: string) {
-  console.log(`${chalk.yellow('⚙')} Pulling ${chalk.blue(site)}'s theme latest version...`);
+async function updateThemeForSite(site: Site) {
+  console.log(`${chalk.yellow('⚙')} Pulling ${chalk.blue(site.name)}'s theme latest version...`);
   await ssh.runInContext(site, `composer theme:download`);
 
-  console.log(`${chalk.yellow('⚙')} Refreshing ${chalk.blue(site)}'s theme assets...`);
+  console.log(`${chalk.yellow('⚙')} Refreshing ${chalk.blue(site.name)}'s theme assets...`);
   await ssh.runInContext(site, `composer theme:refresh`);
 
-  console.log(`${chalk.green('✓')} Updated ${chalk.blue(site)}'s to latest version`);
+  console.log(`${chalk.green('✓')} Updated ${chalk.blue(site.name)}'s to latest version`);
 }
 
 export async function switchThemeCommand(currentSite: string, targetSite: string) {

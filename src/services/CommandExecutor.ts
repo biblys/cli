@@ -1,12 +1,13 @@
 import ssh from "./ssh.js";
+import {Site} from "../types.js";
 
 export default class CommandExecutor
 {
-  constructor(private readonly command: (site: string) => {}) {
+  constructor(private readonly command: (site: Site) => {}) {
     this.command = command;
   }
 
-  async executeForTarget(target: string) {
+  async executeForTarget(target: Site['name']) {
     if (target === "all") {
       await this.#executeForAllSites();
       return;
@@ -18,16 +19,18 @@ export default class CommandExecutor
       return;
     }
 
-    await this.#execute(target);
+    const site: Site = { name: target };
+
+    await this.#execute(site);
   }
 
-  async #execute(site: string) {
+  async #execute(site: Site) {
     await this.command(site);
   }
 
   async #executeForSomeSites(sites: string[]) {
     for (const site of sites) {
-      await this.#execute(site);
+      await this.executeForTarget(site);
       console.log('');
     }
   }
