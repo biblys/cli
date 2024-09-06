@@ -8,7 +8,7 @@ export default {
   },
 
   async runInContext(site: Site, command: string) {
-    return await this.run(site, `cd ~/cloud/${site.name} && ${command}`);
+    return await this.run(site, `cd ${site.path} && ${command}`);
   },
 
   async getCurrentSiteVersion(site: Site) {

@@ -16,8 +16,9 @@ Create a config file at `~/.biblys/config.json` with the following content:
 {
   "sites": [
     {
-      "name": "biblys",
-      "server": "biblys.fr"
+      "name": "paronymie",
+      "server": "paronymie.fr",
+      "path": "/var/www/paronymie"
     }
   ]
 }
