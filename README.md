@@ -10,6 +10,18 @@ cd cli
 npm install -g .
 ```
 
+Create a config file at `~/.biblys/config.json` with the following content:
+
+```json
+{
+  "sites": [
+    {
+      "name": "biblys"
+    }
+  ]
+}
+```
+
 ## Usage
 
 All commands can be run for one site, several sites or all sites

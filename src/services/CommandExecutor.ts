@@ -1,5 +1,5 @@
-import ssh from "./ssh.js";
 import {Site} from "../types.js";
+import getCliConfig from "./CliConfigService.js";
 
 export default class CommandExecutor
 {
@@ -36,8 +36,8 @@ export default class CommandExecutor
   }
 
   async #executeForAllSites() {
-    const sitesList = await ssh.getSitesList();
-    const sites = sitesList.split(/\r?\n/);
+    const config = getCliConfig();
+    const sites = config.sites.map(site => site.name);
     await this.#executeForSomeSites(sites);
   }
 }

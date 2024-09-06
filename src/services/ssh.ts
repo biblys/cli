@@ -14,8 +14,4 @@ export default {
   async getCurrentSiteVersion(site: Site) {
     return await this.runInContext(site, `git describe --tags`);
   },
-
-  async getSitesList() {
-    return await this.run('ls cloud');
-  },
 }
