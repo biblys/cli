@@ -11,7 +11,7 @@ class ConfigService {
   private config: Document.Parsed|undefined;
 
   constructor(site: Site) {
-    this.remoteFilePath = `biblys:~/cloud/${site.name}/app/config.yml`;
+    this.remoteFilePath = `${site.server}:~/cloud/${site.name}/app/config.yml`;
     this.localFilePath = `${os.tmpdir()}/config.yml`;
   }
 

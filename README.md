@@ -16,7 +16,8 @@ Create a config file at `~/.biblys/config.json` with the following content:
 {
   "sites": [
     {
-      "name": "biblys"
+      "name": "biblys",
+      "server": "biblys.fr"
     }
   ]
 }

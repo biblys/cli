@@ -3,7 +3,7 @@ import getCliConfig from "./CliConfigService.js";
 
 export default class CommandExecutor
 {
-  constructor(private readonly command: (site: Site) => {}) {
+  constructor(private readonly command: (site: Site) => Promise<void>) {
     this.command = command;
   }
 
@@ -19,7 +19,12 @@ export default class CommandExecutor
       return;
     }
 
-    const site: Site = { name: target };
+    const config = getCliConfig();
+    const site = config.sites.find(site => site.name === target);
+    if (!site) {
+      console.error(`Site ${target} not found`);
+      return;
+    }
 
     await this.#execute(site);
   }
