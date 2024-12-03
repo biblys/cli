@@ -41,6 +41,11 @@ async function _deploySite(site: Site, targetVersion: string) {
   console.log(`${chalk.yellow('⚙')} Installing dependencies...`);
   await ssh.runInContext(site, `composer install`);
 
+  if (!site.ignoreMigrations) {
+    console.log(`${chalk.yellow('⚙')} Executing databse mgirations...`);
+    await ssh.runInContext(site, `composer db:migrate`);
+  }
+
   console.log(`${chalk.yellow('⚙')} Disabling maintenance mode...`);
   await config.open();
   config.set('maintenance.enabled', "false");
