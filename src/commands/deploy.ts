@@ -41,8 +41,10 @@ async function _deploySite(site: Site, targetVersion: string) {
   console.log(`${chalk.yellow('⚙')} Installing dependencies...`);
   await ssh.runInContext(site, `composer install`);
 
-  if (!site.ignoreMigrations) {
-    console.log(`${chalk.yellow('⚙')} Executing databse mgirations...`);
+  if (site.ignoreMigrations) {
+    console.log(`${chalk.yellow('⇢')} Skipping database migrations...`);
+  } else {
+    console.log(`${chalk.yellow('⚙')} Executing database migrations...`);
     await ssh.runInContext(site, `composer db:migrate`);
   }
 
