@@ -44,8 +44,13 @@ yargs(hideBin(process.argv)).version(false)
         describe: 'path to config option to get',
         type: 'string',
       })
-  }, async ({ site, path }: { site: string, path: string }) => {
-    await configGetCommand(site, path);
+      .option('bare', {
+        describe: 'display raw value without message',
+        type: "boolean",
+        default: false,
+      })
+  }, async ({ site, path, bare }: { site: string, path: string, bare: boolean }) => {
+    await configGetCommand(site, path, bare);
   })
   // @ts-ignore
   .command('config:set [site] [updates...]', 'set a config option\'s value', (yargs) => {

@@ -4,15 +4,20 @@ import ConfigService from "../services/config.js";
 import CommandExecutor from "../services/CommandExecutor.js";
 import {Site} from "../types.js";
 
-async function configGetCommand(target: string, path: string) {
-  const command = new CommandExecutor((site: Site) => _getConfigForSite(site, path))
+async function configGetCommand(target: string, path: string, bare: boolean) {
+  const command = new CommandExecutor((site: Site) => _getConfigForSite(site, path, bare))
   await command.executeForTarget(target)
 }
 
-async function _getConfigForSite(site: Site, path: string) {
+async function _getConfigForSite(site: Site, path: string, bare: boolean) {
   const config = new ConfigService(site);
   await config.open();
   const value = config.get(path);
+
+  if (bare) {
+    console.log(value);
+    return;
+  }
 
   console.log(`ⓘ Option ${chalk.yellow(path)} is set to ${chalk.green(value)} for site ${chalk.blue(site.name)}`);
 }

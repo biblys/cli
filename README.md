@@ -86,9 +86,12 @@ biblys version [site]
 
 Get a config option value for a site
 
+Use `--bare` to return value only without log message.
+
 ```shell
 biblys config:get [site] [path]
-biblys config:set demo maintenance.enabled
+biblys config:get demo maintenance.enabled
+biblys config:get demo maintenance.enabled
 ```
 
 ### `config:set`
