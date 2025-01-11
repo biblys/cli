@@ -2,6 +2,26 @@
 
 Biblys Command Line Interface
 
+## Development
+
+Build
+
+```shell
+npm run build
+```
+
+Build and watch
+
+```shell
+npm run dev
+```
+
+Run built version
+
+```shell
+node build/app.js
+```
+
 ## Install
 
 ```shell
