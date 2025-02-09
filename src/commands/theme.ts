@@ -4,6 +4,7 @@ import ssh from "../services/ssh.js";
 import CommandExecutor from "../services/CommandExecutor.js";
 import {execa} from "execa";
 import {Site} from "../types.js";
+import {getCliConfigForSite} from "../services/CliConfigService.js";
 
 export async function themeUpdateCommand(target: string) {
   const command = new CommandExecutor(updateThemeForSite);
@@ -21,6 +22,10 @@ async function updateThemeForSite(site: Site) {
 }
 
 export async function switchThemeCommand(currentSite: string, targetSite: string) {
+  if (getCliConfigForSite(currentSite) === null || getCliConfigForSite(targetSite) === null) {
+    return;
+  }
+
   console.log(
     `${chalk.yellow('⚙')} Switching local theme from ${chalk.magenta(currentSite)} to ${chalk.blue(targetSite)}...`
   );

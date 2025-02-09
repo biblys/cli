@@ -1,6 +1,7 @@
 import {Site} from "../types.js";
 import {readFileSync} from "fs";
 import os from "os";
+import chalk from "chalk";
 
 type Config = {
   sites: Site[]
@@ -11,7 +12,7 @@ export function getCliConfigForSite(target: string): Site|null {
   const site = config.sites.find(site => site.name === target);
 
   if (!site) {
-    console.error(`Site ${target} not found`);
+    console.error(`${chalk.red('✗')} Site ${target} not found`);
     return null;
   }
 
