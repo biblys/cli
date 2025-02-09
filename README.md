@@ -127,3 +127,11 @@ Replace current site theme with another one
 ```shell
 biblys theme:switch [current] [target]
 ```
+
+### `theme:load`
+
+Load target site's theme to replace current site's 
+
+```shell
+biblys theme:load [target]
+```

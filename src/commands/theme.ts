@@ -1,11 +1,16 @@
 import chalk from "chalk";
 import {execa} from "execa";
-import {existsSync} from "node:fs";
+import {existsSync, writeFileSync} from "node:fs";
 
 import ssh from "../services/ssh.js";
 import CommandExecutor from "../services/CommandExecutor.js";
 import {Site} from "../types.js";
 import {getCliConfigForSite} from "../services/CliConfigService.js";
+import {readFileSync} from "fs";
+import os from "os";
+
+const contextDirectory = `/Users/clement/Developer/biblys`;
+const currentSiteFilePath = `${os.homedir()}/.biblys/current-site`;
 
 export async function themeUpdateCommand(target: string) {
   const command = new CommandExecutor(updateThemeForSite);
@@ -31,7 +36,6 @@ export async function switchThemeCommand(currentSite: string, targetSite: string
     `${chalk.yellow('⚙')} Switching local theme from ${chalk.magenta(currentSite)} to ${chalk.blue(targetSite)}...`
   );
 
-  const contextDirectory = `/Users/clement/Developer/biblys`;
   const devDirectory = `${contextDirectory}/biblys`;
   const appDirectory = `${devDirectory}/app`;
   const currentThemeDirectory = `${contextDirectory}/sites/${currentSite}`;
@@ -57,6 +61,8 @@ export async function switchThemeCommand(currentSite: string, targetSite: string
   );
   await execa("mv", [targetThemeDirectory, appDirectory], {cwd: contextDirectory});
 
+  writeFileSync(currentSiteFilePath, targetSite, 'utf-8');
+
   console.log(
     `${chalk.yellow('⚙')} Refreshing ${chalk.blue(targetSite)}'s theme...`
   );
@@ -65,3 +71,7 @@ export async function switchThemeCommand(currentSite: string, targetSite: string
   console.log(`${chalk.green('✓')} Switched local theme to ${chalk.blue(targetSite)}`);
 }
 
+export async function loadThemeCommand(targetSite: string): Promise<void> {
+  const currentSite = readFileSync(currentSiteFilePath, 'utf-8').trim();
+  await switchThemeCommand(currentSite, targetSite);
+}
