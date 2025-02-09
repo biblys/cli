@@ -1,5 +1,5 @@
 import {Site} from "../types.js";
-import getCliConfig from "./CliConfigService.js";
+import { getCliConfigForSite, getCliConfigForAllSites }  from "./CliConfigService.js";
 
 export default class CommandExecutor
 {
@@ -19,10 +19,8 @@ export default class CommandExecutor
       return;
     }
 
-    const config = getCliConfig();
-    const site = config.sites.find(site => site.name === target);
+    const site = getCliConfigForSite(target);
     if (!site) {
-      console.error(`Site ${target} not found`);
       return;
     }
 
@@ -41,7 +39,7 @@ export default class CommandExecutor
   }
 
   async #executeForAllSites() {
-    const config = getCliConfig();
+    const config = getCliConfigForAllSites();
     const sites = config.sites.map(site => site.name);
     await this.#executeForSomeSites(sites);
   }
