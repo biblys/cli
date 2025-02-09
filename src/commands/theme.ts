@@ -1,8 +1,9 @@
 import chalk from "chalk";
+import {execa} from "execa";
+import {existsSync} from "node:fs";
 
 import ssh from "../services/ssh.js";
 import CommandExecutor from "../services/CommandExecutor.js";
-import {execa} from "execa";
 import {Site} from "../types.js";
 import {getCliConfigForSite} from "../services/CliConfigService.js";
 
@@ -35,6 +36,16 @@ export async function switchThemeCommand(currentSite: string, targetSite: string
   const appDirectory = `${devDirectory}/app`;
   const currentThemeDirectory = `${contextDirectory}/sites/${currentSite}`;
   const targetThemeDirectory = `${contextDirectory}/sites/${targetSite}`;
+
+  if (existsSync(currentThemeDirectory)) {
+    console.error(`${chalk.red('✗')} Current site is not ${chalk.magenta(currentSite)} (directory already exists).`);
+    return;
+  }
+
+  if (!existsSync(targetThemeDirectory)) {
+    console.error(`${chalk.red('✗')} Target directory ${chalk.magenta(currentSite)} does not exist.`);
+    return;
+  }
 
   console.log(
     `${chalk.yellow('⚙')} Moving ${chalk.magenta(currentSite)} to sites/${currentSite} directory...`
