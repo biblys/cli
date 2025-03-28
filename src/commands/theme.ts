@@ -47,7 +47,7 @@ export async function switchThemeCommand(currentSite: string, targetSite: string
   }
 
   if (!existsSync(targetThemeDirectory)) {
-    console.error(`${chalk.red('✗')} Target directory ${chalk.magenta(currentSite)} does not exist.`);
+    console.error(`${chalk.red('✗')} Target directory ${chalk.magenta(targetThemeDirectory)} does not exist.`);
     return;
   }
 
