@@ -125,7 +125,7 @@ yargs(hideBin(process.argv)).version(false)
   .command('report [year]', 'affiche le chiffre d\'affaires par site', (yargs) => {
     return yargs
       .positional('year', {
-        describe: 'année à afficher (défaut: n-1)',
+        describe: 'année à afficher (sans argument: évolution sur 12 ans)',
         type: 'number',
       })
       .option('refresh', {
@@ -134,7 +134,6 @@ yargs(hideBin(process.argv)).version(false)
         default: false,
       })
   }, async ({ year, refresh }: { year: number | undefined, refresh: boolean }) => {
-    const targetYear = year ?? new Date().getFullYear() - 1;
-    await reportCommand(targetYear, refresh);
+    await reportCommand(year, refresh);
   })
   .parse()
