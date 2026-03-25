@@ -7,6 +7,8 @@ import deployCommand from './src/commands/deploy.js';
 import versionCommand from './src/commands/version.js';
 import {configDelCommand, configGetCommand, configSetCommand} from "./src/commands/config.js";
 import {loadThemeCommand, switchThemeCommand, themeUpdateCommand} from "./src/commands/theme.js";
+import setupCommand from './src/commands/setup.js';
+import reportCommand from './src/commands/report.js';
 
 yargs(hideBin(process.argv)).version(false)
   // @ts-ignore
@@ -114,5 +116,25 @@ yargs(hideBin(process.argv)).version(false)
       })
   }, async ({ target }: { target: string }) => {
     await loadThemeCommand(target);
+  })
+  // @ts-ignore
+  .command('setup', 'initialise la base de données locale', () => {}, async () => {
+    await setupCommand();
+  })
+  // @ts-ignore
+  .command('report [year]', 'affiche le chiffre d\'affaires par site', (yargs) => {
+    return yargs
+      .positional('year', {
+        describe: 'année à afficher (défaut: n-1)',
+        type: 'number',
+      })
+      .option('refresh', {
+        describe: 'vide le cache revenues avant de requêter',
+        type: 'boolean',
+        default: false,
+      })
+  }, async ({ year, refresh }: { year: number | undefined, refresh: boolean }) => {
+    const targetYear = year ?? new Date().getFullYear() - 1;
+    await reportCommand(targetYear, refresh);
   })
   .parse()
