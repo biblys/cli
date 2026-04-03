@@ -1,13 +1,95 @@
+import fs from 'fs';
+import path from 'path';
+import os from 'os';
+
 import chalk from 'chalk';
 
 import ssh from '../services/ssh.js';
 import ConfigService from "../services/config.js";
 import CommandExecutor from "../services/CommandExecutor.js";
+import { getCliConfigForAllSites } from '../services/CliConfigService.js';
+import { getRolloutDeployedSites, markRolloutDeployed, runMigrations } from '../services/SqliteService.js';
+import { fetchAnnualRevenue, fetchCredentials } from '../services/revenue.js';
 import {Site} from "../types.js";
 
+const DB_PATH = path.join(os.homedir(), '.biblys', 'cache.db');
+
 async function deployCommand(target: string, version: string) {
+  if (target === 'next') {
+    await deployNextCommand(version);
+    return;
+  }
   const command = new CommandExecutor((site: Site) => _deploySite(site, version))
   await command.executeForTarget(target)
+}
+
+async function deployNextCommand(targetVersion: string): Promise<void> {
+  if (!fs.existsSync(DB_PATH)) {
+    console.error(
+      `${chalk.red('✗')} Local database not initialized. Run ${chalk.yellow('biblys setup')} first (required for revenue-based ordering).`,
+    );
+    process.exit(1);
+  }
+
+  runMigrations();
+
+  const config = getCliConfigForAllSites();
+  const sites = config.sites;
+  const revenueYear = new Date().getFullYear() - 1;
+  const deployed = new Set(getRolloutDeployedSites(targetVersion));
+
+  type SiteWithRevenue = { site: Site; revenue: number };
+  const withRevenue: SiteWithRevenue[] = [];
+
+  for (let i = 0; i < sites.length; i++) {
+    const site = sites[i];
+    process.stdout.write(`\r${chalk.yellow('⇢')} [${i + 1}/${sites.length}] ${chalk.blue(site.name)} (CA ${revenueYear})…`);
+    try {
+      const creds = await fetchCredentials(site);
+      const revenue = await fetchAnnualRevenue(site, creds, revenueYear);
+      withRevenue.push({ site, revenue });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      process.stdout.write('\n');
+      console.error(`${chalk.red('✗')} Error fetching revenue for ${chalk.blue(site.name)}: ${message}`);
+      withRevenue.push({ site, revenue: 0 });
+    }
+  }
+
+  process.stdout.write('\r' + ' '.repeat(72) + '\r');
+
+  withRevenue.sort((a, b) => {
+    if (a.revenue !== b.revenue) return a.revenue - b.revenue;
+    return a.site.name.localeCompare(b.site.name);
+  });
+
+  const next = withRevenue.find((row) => !deployed.has(row.site.name));
+  if (!next) {
+    console.log(
+      `${chalk.green('✓')} Progressive deploy for ${chalk.yellow(targetVersion)} is complete: all ${sites.length} site(s) are already deployed.`,
+    );
+    return;
+  }
+
+  const rank = deployed.size + 1;
+  console.log(
+    `${chalk.yellow('⚙')} Progressive deploy [${rank}/${sites.length}] — ${chalk.blue(next.site.name)} (CA ${revenueYear}: ${formatRevenueEuros(next.revenue)})`,
+  );
+
+  await _deploySite(next.site, targetVersion);
+  markRolloutDeployed(targetVersion, next.site.name);
+
+  const remaining = sites.length - deployed.size - 1;
+  if (remaining > 0) {
+    console.log(`${chalk.yellow('⇢')} Run ${chalk.yellow(`biblys deploy next ${targetVersion}`)} again to deploy the next site (${remaining} remaining).`);
+  } else {
+    console.log(`${chalk.green('✓')} Last site deployed for ${chalk.yellow(targetVersion)}.`);
+  }
+}
+
+function formatRevenueEuros(cents: number): string {
+  const euros = Math.round(cents / 100);
+  return euros.toLocaleString('fr-FR') + '\u00a0€';
 }
 
 async function _deploySite(site: Site, targetVersion: string) {

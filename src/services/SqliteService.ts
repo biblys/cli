@@ -46,6 +46,11 @@ export function runMigrations(): void {
       amount_cents INTEGER NOT NULL,
       PRIMARY KEY (site_name, year, month)
     );
+    CREATE TABLE IF NOT EXISTS deploy_rollout (
+      target_version TEXT NOT NULL,
+      site_name TEXT NOT NULL,
+      PRIMARY KEY (target_version, site_name)
+    );
   `);
   db.close();
 }
@@ -93,5 +98,23 @@ export function saveRevenue(siteName: string, year: number, month: number, amoun
 export function clearRevenues(): void {
   const db = openDb();
   db.prepare('DELETE FROM revenues').run();
+  db.close();
+}
+
+export function getRolloutDeployedSites(targetVersion: string): string[] {
+  const db = openDb();
+  const rows = db
+    .prepare('SELECT site_name FROM deploy_rollout WHERE target_version = ? ORDER BY site_name')
+    .all(targetVersion) as { site_name: string }[];
+  db.close();
+  return rows.map((r) => r.site_name);
+}
+
+export function markRolloutDeployed(targetVersion: string, siteName: string): void {
+  const db = openDb();
+  db.prepare(`
+    INSERT OR IGNORE INTO deploy_rollout (target_version, site_name)
+    VALUES (?, ?)
+  `).run(targetVersion, siteName);
   db.close();
 }

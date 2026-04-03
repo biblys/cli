@@ -13,10 +13,10 @@ import adminsCommand from './src/commands/admins.js';
 
 yargs(hideBin(process.argv)).version(false)
   // @ts-ignore
-  .command('deploy [site] [version]', 'deploy a single site', (yargs) => {
+  .command('deploy [site] [version]', 'deploy a single site, or use site "next" for progressive rollout (lowest revenue n-1 first)', (yargs) => {
     return yargs
       .positional('site', {
-        describe: 'site to deploy',
+        describe: 'site name, "all", comma-separated list, or "next" for one step of progressive deploy',
         type: 'string',
       })
       .positional('version', {
