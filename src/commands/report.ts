@@ -4,17 +4,9 @@ import os from 'os';
 
 import chalk from 'chalk';
 
-import ConfigService from '../services/config.js';
 import { getCliConfigForAllSites } from '../services/CliConfigService.js';
-import {
-  getCredentials,
-  saveCredentials,
-  getRevenue,
-  saveRevenue,
-  clearRevenues,
-  type Credentials,
-} from '../services/SqliteService.js';
-import ssh from '../services/ssh.js';
+import { clearRevenues } from '../services/SqliteService.js';
+import { fetchCredentials, fetchSiteRevenues } from '../services/revenue.js';
 import { Site } from '../types.js';
 
 const MONTH_NAMES = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
@@ -23,71 +15,6 @@ const DB_PATH = path.join(os.homedir(), '.biblys', 'cache.db');
 function formatEuros(cents: number): string {
   const euros = Math.round(cents / 100);
   return euros.toLocaleString('fr-FR') + '\u00a0€';
-}
-
-async function fetchCredentials(site: Site): Promise<Credentials> {
-  const cached = getCredentials(site.name);
-  if (cached) return cached;
-
-  const config = new ConfigService(site);
-  await config.open();
-  const creds: Credentials = {
-    host: String(config.get('db.host') ?? 'localhost'),
-    port: Number(config.get('db.port') ?? 3306),
-    user: String(config.get('db.user') ?? ''),
-    pass: String(config.get('db.pass') ?? ''),
-    baseName: String(config.get('db.base') ?? ''),
-  };
-  saveCredentials(site.name, creds);
-  return creds;
-}
-
-async function fetchSiteRevenues(site: Site, creds: Credentials, year: number): Promise<number[]> {
-  const result: number[] = new Array(12).fill(0);
-  const missingMonths: number[] = [];
-
-  for (let m = 1; m <= 12; m++) {
-    const cached = getRevenue(site.name, year, m);
-    if (cached !== null) {
-      result[m - 1] = cached;
-    } else {
-      missingMonths.push(m);
-    }
-  }
-
-  if (missingMonths.length === 0) {
-    return result;
-  }
-
-  const monthList = missingMonths.join(', ');
-  const sql =
-    `SELECT MONTH(payment_executed), SUM(payment_amount) ` +
-    `FROM payments ` +
-    `WHERE payment_executed IS NOT NULL ` +
-    `AND YEAR(payment_executed) = ${year} ` +
-    `AND MONTH(payment_executed) IN (${monthList}) ` +
-    `GROUP BY MONTH(payment_executed)`;
-
-  const passArg = creds.pass ? `-p'${creds.pass}'` : '';
-  const output = await ssh.run(
-    site,
-    `mysql -h ${creds.host} -P ${creds.port} -u ${creds.user} ${passArg} ${creds.baseName} --skip-column-names -e "${sql}" 2>/dev/null`,
-  );
-
-  const monthData = new Map<number, number>();
-  for (const line of output.trim().split('\n')) {
-    if (!line.trim()) continue;
-    const [monthStr, amountStr] = line.split('\t');
-    monthData.set(Number(monthStr), Math.round(Number(amountStr)));
-  }
-
-  for (const m of missingMonths) {
-    const amount = monthData.get(m) ?? 0;
-    saveRevenue(site.name, year, m, amount);
-    result[m - 1] = amount;
-  }
-
-  return result;
 }
 
 function displayAnnualTable(years: number[], siteNames: string[], data: Map<string, number[]>): void {
