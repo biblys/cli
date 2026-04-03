@@ -135,3 +135,11 @@ Load target site's theme to replace current site's
 ```shell
 biblys theme:load [target]
 ```
+
+### `admins`
+
+Export all admins in a Listmonk-compatible CSV file.
+
+```shell
+biblys admins
+```

@@ -9,6 +9,7 @@ import {configDelCommand, configGetCommand, configSetCommand} from "./src/comman
 import {loadThemeCommand, switchThemeCommand, themeUpdateCommand} from "./src/commands/theme.js";
 import setupCommand from './src/commands/setup.js';
 import reportCommand from './src/commands/report.js';
+import adminsCommand from './src/commands/admins.js';
 
 yargs(hideBin(process.argv)).version(false)
   // @ts-ignore
@@ -135,5 +136,9 @@ yargs(hideBin(process.argv)).version(false)
       })
   }, async ({ year, refresh }: { year: number | undefined, refresh: boolean }) => {
     await reportCommand(year, refresh);
+  })
+  // @ts-ignore
+  .command('admins', 'exporte la liste des admins en CSV', () => {}, async () => {
+    await adminsCommand();
   })
   .parse()
