@@ -9,7 +9,12 @@ import ConfigService from "../services/config.js";
 import CommandExecutor from "../services/CommandExecutor.js";
 import { getCliConfigForAllSites } from '../services/CliConfigService.js';
 import { getRolloutDeployedSites, markRolloutDeployed, runMigrations } from '../services/SqliteService.js';
-import { fetchAnnualRevenue, fetchCredentials } from '../services/revenue.js';
+import {
+  fetchCredentials,
+  fetchRolling12MonthsRevenueExcludingCurrent,
+  formatRollingRevenuePeriodLabel,
+  getRolling12MonthsExcludingCurrent,
+} from '../services/revenue.js';
 import {Site} from "../types.js";
 
 const DB_PATH = path.join(os.homedir(), '.biblys', 'cache.db');
@@ -35,7 +40,8 @@ async function deployNextCommand(targetVersion: string): Promise<void> {
 
   const config = getCliConfigForAllSites();
   const sites = config.sites;
-  const revenueYear = new Date().getFullYear() - 1;
+  const revenuePeriod = getRolling12MonthsExcludingCurrent();
+  const revenuePeriodLabel = formatRollingRevenuePeriodLabel(revenuePeriod);
   const deployed = new Set(getRolloutDeployedSites(targetVersion));
 
   type SiteWithRevenue = { site: Site; revenue: number };
@@ -43,10 +49,10 @@ async function deployNextCommand(targetVersion: string): Promise<void> {
 
   for (let i = 0; i < sites.length; i++) {
     const site = sites[i];
-    process.stdout.write(`\r${chalk.yellow('⇢')} [${i + 1}/${sites.length}] ${chalk.blue(site.name)} (CA ${revenueYear})…`);
+    process.stdout.write(`\r${chalk.yellow('⇢')} [${i + 1}/${sites.length}] ${chalk.blue(site.name)} (CA ${revenuePeriodLabel})…`);
     try {
       const creds = await fetchCredentials(site);
-      const revenue = await fetchAnnualRevenue(site, creds, revenueYear);
+      const revenue = await fetchRolling12MonthsRevenueExcludingCurrent(site, creds, revenuePeriod);
       withRevenue.push({ site, revenue });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
@@ -56,7 +62,7 @@ async function deployNextCommand(targetVersion: string): Promise<void> {
     }
   }
 
-  process.stdout.write('\r' + ' '.repeat(72) + '\r');
+  process.stdout.write('\r' + ' '.repeat(100) + '\r');
 
   withRevenue.sort((a, b) => {
     if (a.revenue !== b.revenue) return a.revenue - b.revenue;
@@ -73,7 +79,7 @@ async function deployNextCommand(targetVersion: string): Promise<void> {
 
   const rank = deployed.size + 1;
   console.log(
-    `${chalk.yellow('⚙')} Progressive deploy [${rank}/${sites.length}] — ${chalk.blue(next.site.name)} (CA ${revenueYear}: ${formatRevenueEuros(next.revenue)})`,
+    `${chalk.yellow('⚙')} Progressive deploy [${rank}/${sites.length}] — ${chalk.blue(next.site.name)} (CA ${revenuePeriodLabel}: ${formatRevenueEuros(next.revenue)})`,
   );
 
   await _deploySite(next.site, targetVersion);
@@ -83,7 +89,7 @@ async function deployNextCommand(targetVersion: string): Promise<void> {
   const following = withRevenue.find((row) => !deployed.has(row.site.name));
   if (following) {
     console.log(
-      `${chalk.yellow('⇢')} Next deploy will target ${chalk.blue(following.site.name)} (CA ${revenueYear}: ${formatRevenueEuros(following.revenue)}). Run ${chalk.yellow(`biblys deploy next ${targetVersion}`)} again.`,
+      `${chalk.yellow('⇢')} Next deploy will target ${chalk.blue(following.site.name)} (CA ${revenuePeriodLabel}: ${formatRevenueEuros(following.revenue)}). Run ${chalk.yellow(`biblys deploy next ${targetVersion}`)} again.`,
     );
   } else {
     console.log(`${chalk.green('✓')} Last site deployed for ${chalk.yellow(targetVersion)}.`);

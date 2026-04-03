@@ -78,3 +78,60 @@ export async function fetchAnnualRevenue(site: Site, creds: Credentials, year: n
   const months = await fetchSiteRevenues(site, creds, year);
   return months.reduce((a, b) => a + b, 0);
 }
+
+/** 12 consecutive calendar months ending the month before “today”, oldest first. */
+export function getRolling12MonthsExcludingCurrent(): { year: number; month: number }[] {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1;
+
+  let endY = year;
+  let endM = month - 1;
+  if (endM === 0) {
+    endM = 12;
+    endY -= 1;
+  }
+
+  const months: { year: number; month: number }[] = [];
+  let y = endY;
+  let m = endM;
+  for (let i = 0; i < 12; i++) {
+    months.unshift({ year: y, month: m });
+    m -= 1;
+    if (m === 0) {
+      m = 12;
+      y -= 1;
+    }
+  }
+  return months;
+}
+
+export function formatRollingRevenuePeriodLabel(period: { year: number; month: number }[]): string {
+  if (period.length === 0) return '';
+  const first = period[0];
+  const last = period[period.length - 1];
+  const fmt = new Intl.DateTimeFormat('en-GB', { month: 'short', year: 'numeric' });
+  return `${fmt.format(new Date(first.year, first.month - 1, 1))} → ${fmt.format(new Date(last.year, last.month - 1, 1))}`;
+}
+
+/** Sum of CA over {@link getRolling12MonthsExcludingCurrent}, reusing per-year fetches and cache. */
+export async function fetchRolling12MonthsRevenueExcludingCurrent(
+  site: Site,
+  creds: Credentials,
+  period: { year: number; month: number }[],
+): Promise<number> {
+  const byYear = new Map<number, Set<number>>();
+  for (const { year, month } of period) {
+    if (!byYear.has(year)) byYear.set(year, new Set());
+    byYear.get(year)!.add(month);
+  }
+
+  let total = 0;
+  for (const [y, monthSet] of byYear) {
+    const fullYear = await fetchSiteRevenues(site, creds, y);
+    for (const m of monthSet) {
+      total += fullYear[m - 1];
+    }
+  }
+  return total;
+}
