@@ -78,10 +78,13 @@ async function deployNextCommand(targetVersion: string): Promise<void> {
 
   await _deploySite(next.site, targetVersion);
   markRolloutDeployed(targetVersion, next.site.name);
+  deployed.add(next.site.name);
 
-  const remaining = sites.length - deployed.size - 1;
-  if (remaining > 0) {
-    console.log(`${chalk.yellow('⇢')} Run ${chalk.yellow(`biblys deploy next ${targetVersion}`)} again to deploy the next site (${remaining} remaining).`);
+  const following = withRevenue.find((row) => !deployed.has(row.site.name));
+  if (following) {
+    console.log(
+      `${chalk.yellow('⇢')} Next deploy will target ${chalk.blue(following.site.name)} (CA ${revenueYear}: ${formatRevenueEuros(following.revenue)}). Run ${chalk.yellow(`biblys deploy next ${targetVersion}`)} again.`,
+    );
   } else {
     console.log(`${chalk.green('✓')} Last site deployed for ${chalk.yellow(targetVersion)}.`);
   }
