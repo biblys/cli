@@ -1,8 +1,9 @@
 import chalk from 'chalk';
+import { stringify as yamlStringify } from 'yaml';
 
 import ConfigService from "../services/config.js";
 import CommandExecutor from "../services/CommandExecutor.js";
-import {Site} from "../types.js";
+import { Site } from "../types.js";
 
 async function configGetCommand(target: string, path: string, bare: boolean) {
   const command = new CommandExecutor((site: Site) => _getConfigForSite(site, path, bare))
@@ -16,6 +17,13 @@ async function _getConfigForSite(site: Site, path: string, bare: boolean) {
 
   if (bare) {
     console.log(value);
+    return;
+  }
+
+  if (typeof value === 'object' && value !== null) {
+    console.log(`ⓘ Option ${chalk.yellow(path)} is set to the following for site ${chalk.blue(site.name)}:\n`);
+    const key = path.split('.').pop() || 'value';
+    console.log(chalk.dim(yamlStringify({ [key]: value })));
     return;
   }
 
