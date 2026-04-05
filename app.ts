@@ -123,7 +123,7 @@ const cli = yargs(hideBin(process.argv)).version(false)
     await setupCommand();
   })
   // @ts-ignore
-  .command('report [year]', 'affiche le chiffre d\'affaires par site', (yargs) => {
+  .command('report:revenue [year]', 'affiche le chiffre d\'affaires par site', (yargs) => {
     return yargs
       .positional('year', {
         describe: 'année à afficher (sans argument: évolution sur 12 ans)',
