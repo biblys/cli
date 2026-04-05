@@ -11,7 +11,7 @@ import setupCommand from './src/commands/setup.js';
 import reportCommand from './src/commands/report.js';
 import adminsCommand from './src/commands/admins.js';
 
-yargs(hideBin(process.argv)).version(false)
+const cli = yargs(hideBin(process.argv)).version(false)
   // @ts-ignore
   .command('deploy [site] [version]', 'deploy a single site, or use site "next" for progressive rollout (lowest revenue n-1 first)', (yargs) => {
     return yargs
@@ -141,4 +141,10 @@ yargs(hideBin(process.argv)).version(false)
   .command('admins', 'exporte la liste des admins en CSV', () => {}, async () => {
     await adminsCommand();
   })
-  .parse()
+  // @ts-ignore
+  .command('$0', false, () => {}, () => {
+    cli.showHelp();
+    process.exit(0);
+  })
+
+cli.parse()
