@@ -46,6 +46,13 @@ export function runMigrations(): void {
       amount_cents INTEGER NOT NULL,
       PRIMARY KEY (site_name, year, month)
     );
+    CREATE TABLE IF NOT EXISTS sales (
+      site_name TEXT NOT NULL,
+      year INTEGER NOT NULL,
+      month INTEGER NOT NULL,
+      quantity INTEGER NOT NULL,
+      PRIMARY KEY (site_name, year, month)
+    );
     CREATE TABLE IF NOT EXISTS deploy_rollout (
       target_version TEXT NOT NULL,
       site_name TEXT NOT NULL,
@@ -98,6 +105,33 @@ export function saveRevenue(siteName: string, year: number, month: number, amoun
 export function clearRevenues(): void {
   const db = openDb();
   db.prepare('DELETE FROM revenues').run();
+  db.close();
+}
+
+type SaleRow = {
+  quantity: number;
+};
+
+export function getSale(siteName: string, year: number, month: number): number | null {
+  const db = openDb();
+  const row = db.prepare('SELECT quantity FROM sales WHERE site_name = ? AND year = ? AND month = ?').get(siteName, year, month) as SaleRow | undefined;
+  db.close();
+  if (!row) return null;
+  return row.quantity;
+}
+
+export function saveSale(siteName: string, year: number, month: number, quantity: number): void {
+  const db = openDb();
+  db.prepare(`
+    INSERT OR REPLACE INTO sales (site_name, year, month, quantity)
+    VALUES (?, ?, ?, ?)
+  `).run(siteName, year, month, quantity);
+  db.close();
+}
+
+export function clearSales(): void {
+  const db = openDb();
+  db.prepare('DELETE FROM sales').run();
   db.close();
 }
 

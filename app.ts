@@ -9,6 +9,7 @@ import {configDelCommand, configGetCommand, configSetCommand} from "./src/comman
 import {loadThemeCommand, switchThemeCommand, themeUpdateCommand} from "./src/commands/theme.js";
 import setupCommand from './src/commands/setup.js';
 import reportCommand from './src/commands/report.js';
+import reportSalesCommand from './src/commands/reportSales.js';
 import adminsCommand from './src/commands/admins.js';
 
 const cli = yargs(hideBin(process.argv)).version(false)
@@ -136,6 +137,21 @@ const cli = yargs(hideBin(process.argv)).version(false)
       })
   }, async ({ year, refresh }: { year: number | undefined, refresh: boolean }) => {
     await reportCommand(year, refresh);
+  })
+  // @ts-ignore
+  .command('report:sales [year]', 'affiche le nombre d\'exemplaires vendus par site', (yargs) => {
+    return yargs
+      .positional('year', {
+        describe: 'année à afficher (sans argument: évolution sur 12 ans)',
+        type: 'number',
+      })
+      .option('refresh', {
+        describe: 'vide le cache ventes avant de requêter',
+        type: 'boolean',
+        default: false,
+      })
+  }, async ({ year, refresh }: { year: number | undefined, refresh: boolean }) => {
+    await reportSalesCommand(year, refresh);
   })
   // @ts-ignore
   .command('admins', 'exporte la liste des admins en CSV', () => {}, async () => {
