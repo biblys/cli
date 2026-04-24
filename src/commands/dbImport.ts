@@ -1,6 +1,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import { spawn } from 'child_process';
 
 import { execa } from 'execa';
 import chalk from 'chalk';
@@ -21,10 +22,10 @@ export default async function dbImportCommand(siteName: string): Promise<void> {
   const tmpFile = path.join(os.tmpdir(), `biblys-${site.name}.sql`);
 
   try {
-    // Étape 1 : dump via SSH
+    // Étape 1 : dump via SSH — spawn évite le buffer interne d'execa (limité à 100 MB)
     const passArg = creds.pass ? `-p'${creds.pass}'` : '';
     const dumpCmd = `mysqldump -h ${creds.host} -P ${creds.port} -u ${creds.user} ${passArg} ${creds.baseName} 2>/dev/null`;
-    const sshProc = execa('ssh', [site.server, dumpCmd]);
+    const sshProc = spawn('ssh', [site.server, dumpCmd]);
 
     if (!sshProc.stdout) throw new Error('No stdout stream from SSH process');
 
@@ -44,7 +45,13 @@ export default async function dbImportCommand(siteName: string): Promise<void> {
         writeStream.on('finish', resolve);
         writeStream.on('error', reject);
       }),
-      sshProc,
+      new Promise<void>((resolve, reject) => {
+        sshProc.on('close', (code) => {
+          if (code === 0) resolve();
+          else reject(new Error(`SSH process exited with code ${code}`));
+        });
+        sshProc.on('error', reject);
+      }),
     ]);
 
     process.stdout.write('\n');
@@ -53,12 +60,12 @@ export default async function dbImportCommand(siteName: string): Promise<void> {
 
     // Étape 1.5 : drop et créer la base après dump réussi
     process.stdout.write(`${chalk.yellow('⇢')} Création de la base ${chalk.blue(dbName)}…\n`);
-    await execa('mysql', ['-u', 'root', '-e', `DROP DATABASE IF EXISTS \`${dbName}\`; CREATE DATABASE \`${dbName}\``]);
+    await execa('mysql', ['-h', '127.0.0.1', '-u', 'root', '-e', `DROP DATABASE IF EXISTS \`${dbName}\`; CREATE DATABASE \`${dbName}\``]);
 
     // Étape 2 : import local
     const fileSize = fs.statSync(tmpFile).size;
     const readStream = fs.createReadStream(tmpFile);
-    const mysqlProc = execa('mysql', ['-u', 'root', dbName]);
+    const mysqlProc = execa('mysql', ['-h', '127.0.0.1', '-u', 'root', dbName]);
 
     if (!mysqlProc.stdin) throw new Error('No stdin stream for MySQL process');
 
