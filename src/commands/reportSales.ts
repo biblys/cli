@@ -140,7 +140,9 @@ function displayTable(year: number, siteNames: string[], data: Map<string, numbe
   console.log(totalRow);
 }
 
-export default async function reportSalesCommand(year: number | undefined, refresh: boolean): Promise<void> {
+const FIRST_YEAR = 2008;
+
+export default async function reportSalesCommand(year: number | undefined, refresh: boolean, all: boolean = false): Promise<void> {
   if (!fs.existsSync(DB_PATH)) {
     console.error(
       `${chalk.red('✗')} Base de données non initialisée. Exécutez ${chalk.yellow('biblys setup')} d'abord.`,
@@ -159,7 +161,9 @@ export default async function reportSalesCommand(year: number | undefined, refre
 
   if (year === undefined) {
     const currentYear = new Date().getFullYear();
-    const years = Array.from({ length: 12 }, (_, i) => currentYear - 11 + i);
+    const years = all
+      ? Array.from({ length: currentYear - FIRST_YEAR + 1 }, (_, i) => FIRST_YEAR + i)
+      : Array.from({ length: 12 }, (_, i) => currentYear - 11 + i);
     const data = new Map<string, number[]>();
 
     for (let i = 0; i < sites.length; i++) {

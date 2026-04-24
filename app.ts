@@ -135,8 +135,13 @@ const cli = yargs(hideBin(process.argv)).version(false)
         type: 'boolean',
         default: false,
       })
-  }, async ({ year, refresh }: { year: number | undefined, refresh: boolean }) => {
-    await reportCommand(year, refresh);
+      .option('all', {
+        describe: 'affiche toutes les années depuis 2008',
+        type: 'boolean',
+        default: false,
+      })
+  }, async ({ year, refresh, all }: { year: number | undefined, refresh: boolean, all: boolean }) => {
+    await reportCommand(year, refresh, all);
   })
   // @ts-ignore
   .command('report:sales [year]', 'affiche le nombre d\'exemplaires vendus par site', (yargs) => {
@@ -150,8 +155,13 @@ const cli = yargs(hideBin(process.argv)).version(false)
         type: 'boolean',
         default: false,
       })
-  }, async ({ year, refresh }: { year: number | undefined, refresh: boolean }) => {
-    await reportSalesCommand(year, refresh);
+      .option('all', {
+        describe: 'affiche toutes les années depuis 2008',
+        type: 'boolean',
+        default: false,
+      })
+  }, async ({ year, refresh, all }: { year: number | undefined, refresh: boolean, all: boolean }) => {
+    await reportSalesCommand(year, refresh, all);
   })
   // @ts-ignore
   .command('admins', 'exporte la liste des admins en CSV', () => {}, async () => {
