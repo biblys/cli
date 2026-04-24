@@ -29,6 +29,8 @@ export default async function dbImportCommand(siteName: string): Promise<void> {
 
     if (!sshProc.stdout) throw new Error('No stdout stream from SSH process');
 
+    sshProc.stderr?.on('data', (chunk: Buffer) => process.stderr.write(chunk));
+
     const writeStream = fs.createWriteStream(tmpFile);
     let bytesReceived = 0;
 
@@ -74,8 +76,8 @@ export default async function dbImportCommand(siteName: string): Promise<void> {
     readStream.on('data', (chunk: Buffer) => {
       bytesRead += chunk.length;
       const pct = Math.floor((bytesRead / fileSize) * 100);
-      const filled = Math.floor(pct / 10);
-      const bar = '█'.repeat(filled) + '░'.repeat(10 - filled);
+      const filled = Math.floor(pct / 5);
+      const bar = '█'.repeat(filled) + '░'.repeat(20 - filled);
       process.stdout.write(`\r${chalk.yellow('⇢')} [2/2] Import dans ${chalk.blue(dbName)}… [${bar}] ${pct}%`);
     });
 
