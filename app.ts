@@ -11,6 +11,7 @@ import setupCommand from './src/commands/setup.js';
 import reportCommand from './src/commands/report.js';
 import reportSalesCommand from './src/commands/reportSales.js';
 import adminsCommand from './src/commands/admins.js';
+import dbImportCommand from './src/commands/dbImport.js';
 
 const cli = yargs(hideBin(process.argv)).version(false)
   // @ts-ignore
@@ -166,6 +167,16 @@ const cli = yargs(hideBin(process.argv)).version(false)
   // @ts-ignore
   .command('admins', 'exporte la liste des admins en CSV', () => {}, async () => {
     await adminsCommand();
+  })
+  // @ts-ignore
+  .command('db:import <site>', 'importe la base de données de prod dans une base locale', (yargs) => {
+    return yargs
+      .positional('site', {
+        describe: 'nom du site à importer',
+        type: 'string',
+      })
+  }, async ({ site }: { site: string }) => {
+    await dbImportCommand(site);
   })
   // @ts-ignore
   .command('$0', false, () => {}, () => {
