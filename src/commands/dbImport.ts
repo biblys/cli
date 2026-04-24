@@ -18,9 +18,6 @@ export default async function dbImportCommand(siteName: string): Promise<void> {
   const creds = await fetchCredentials(site);
 
   const dbName = `biblys-${site.name}`;
-  process.stdout.write(`${chalk.yellow('⇢')} Création de la base ${chalk.blue(dbName)}…\n`);
-  await execa('mysql', ['-u', 'root', '-e', `DROP DATABASE IF EXISTS \`${dbName}\`; CREATE DATABASE \`${dbName}\``]);
-
   const tmpFile = path.join(os.tmpdir(), `biblys-${site.name}.sql`);
 
   try {
@@ -28,16 +25,19 @@ export default async function dbImportCommand(siteName: string): Promise<void> {
     const passArg = creds.pass ? `-p'${creds.pass}'` : '';
     const dumpCmd = `mysqldump -h ${creds.host} -P ${creds.port} -u ${creds.user} ${passArg} ${creds.baseName} 2>/dev/null`;
     const sshProc = execa('ssh', [site.server, dumpCmd]);
+
+    if (!sshProc.stdout) throw new Error('No stdout stream from SSH process');
+
     const writeStream = fs.createWriteStream(tmpFile);
     let bytesReceived = 0;
 
-    sshProc.stdout!.on('data', (chunk: Buffer) => {
+    sshProc.stdout.on('data', (chunk: Buffer) => {
       bytesReceived += chunk.length;
       const mb = (bytesReceived / 1024 / 1024).toFixed(1);
       process.stdout.write(`\r${chalk.yellow('⇢')} [1/2] Dump de ${chalk.blue(creds.baseName)}… ${mb} Mo`);
     });
 
-    sshProc.stdout!.pipe(writeStream);
+    sshProc.stdout.pipe(writeStream);
 
     await Promise.all([
       new Promise<void>((resolve, reject) => {
@@ -51,10 +51,17 @@ export default async function dbImportCommand(siteName: string): Promise<void> {
     const dumpMb = (bytesReceived / 1024 / 1024).toFixed(1);
     console.log(`${chalk.green('✓')} [1/2] Dump terminé (${dumpMb} Mo)`);
 
+    // Étape 1.5 : drop et créer la base après dump réussi
+    process.stdout.write(`${chalk.yellow('⇢')} Création de la base ${chalk.blue(dbName)}…\n`);
+    await execa('mysql', ['-u', 'root', '-e', `DROP DATABASE IF EXISTS \`${dbName}\`; CREATE DATABASE \`${dbName}\``]);
+
     // Étape 2 : import local
     const fileSize = fs.statSync(tmpFile).size;
     const readStream = fs.createReadStream(tmpFile);
     const mysqlProc = execa('mysql', ['-u', 'root', dbName]);
+
+    if (!mysqlProc.stdin) throw new Error('No stdin stream for MySQL process');
+
     let bytesRead = 0;
 
     readStream.on('data', (chunk: Buffer) => {
@@ -65,7 +72,7 @@ export default async function dbImportCommand(siteName: string): Promise<void> {
       process.stdout.write(`\r${chalk.yellow('⇢')} [2/2] Import dans ${chalk.blue(dbName)}… [${bar}] ${pct}%`);
     });
 
-    readStream.pipe(mysqlProc.stdin!);
+    readStream.pipe(mysqlProc.stdin);
     await mysqlProc;
 
     process.stdout.write('\n');
