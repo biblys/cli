@@ -19,16 +19,16 @@ import {Site} from "../types.js";
 
 const DB_PATH = path.join(os.homedir(), '.biblys', 'cache.db');
 
-async function deployCommand(target: string, version: string) {
+async function deployCommand(target: string, version: string, force: boolean = false) {
   if (target === 'next') {
-    await deployNextCommand(version);
+    await deployNextCommand(version, force);
     return;
   }
-  const command = new CommandExecutor((site: Site) => _deploySite(site, version))
+  const command = new CommandExecutor((site: Site) => _deploySite(site, version, force))
   await command.executeForTarget(target)
 }
 
-async function deployNextCommand(targetVersion: string): Promise<void> {
+async function deployNextCommand(targetVersion: string, force: boolean = false): Promise<void> {
   if (!fs.existsSync(DB_PATH)) {
     console.error(
       `${chalk.red('✗')} Local database not initialized. Run ${chalk.yellow('biblys setup')} first (required for revenue-based ordering).`,
@@ -82,7 +82,7 @@ async function deployNextCommand(targetVersion: string): Promise<void> {
     `${chalk.yellow('⚙')} Progressive deploy [${rank}/${sites.length}] — ${chalk.blue(next.site.name)} (CA ${revenuePeriodLabel}: ${formatRevenueEuros(next.revenue)})`,
   );
 
-  await _deploySite(next.site, targetVersion);
+  await _deploySite(next.site, targetVersion, force);
   markRolloutDeployed(targetVersion, next.site.name);
   deployed.add(next.site.name);
 
@@ -101,9 +101,9 @@ function formatRevenueEuros(cents: number): string {
   return euros.toLocaleString('fr-FR') + '\u00a0€';
 }
 
-async function _deploySite(site: Site, targetVersion: string) {
+async function _deploySite(site: Site, targetVersion: string, force: boolean = false) {
   const currentVersion = await ssh.getCurrentSiteVersion(site);
-  if (currentVersion === targetVersion) {
+  if (currentVersion === targetVersion && !force) {
     console.log(`👌 Version ${chalk.yellow(targetVersion)} is already deployed on site ${chalk.blue(site.name)}.`)
     return;
   }

@@ -25,8 +25,13 @@ const cli = yargs(hideBin(process.argv)).version(false)
         describe: 'biblys version to deploy',
         type: 'string',
       })
-  }, async ({ site, version }: { site: string, version: string }) => {
-    await deployCommand(site, version);
+      .option('force', {
+        describe: 'force le déploiement même si la version est déjà installée',
+        type: 'boolean',
+        default: false,
+      })
+  }, async ({ site, version, force }: { site: string, version: string, force: boolean }) => {
+    await deployCommand(site, version, force);
   })
   // @ts-ignore
   .command('version [site]', 'display a site\'s current version', (yargs) => {
